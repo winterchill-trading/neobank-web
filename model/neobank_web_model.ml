@@ -2,3 +2,4 @@
 
 module Currency = Currency
 module Units = Units
+module Format = Format
