@@ -1,0 +1,9 @@
+; Some library in the app's closure (not the app) contains OCaml 5 effect handlers. The
+; app never performs an effect, so js_of_ocaml's default "disabled" effects backend is
+; right, and its link-time warning suggesting --effects=cps is turned off.
+
+(env
+ (_
+  (js_of_ocaml
+   (link_flags
+    (:standard -w no-missing-effects-backend)))))
