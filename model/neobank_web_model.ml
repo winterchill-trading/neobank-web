@@ -8,3 +8,5 @@ module Route = Route
 module Endpoint = Endpoint
 module Statement_csv = Statement_csv
 module Qr = Qr
+module Api_failure = Api_failure
+module Clock = Clock

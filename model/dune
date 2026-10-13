@@ -3,6 +3,6 @@
 
 (library
  (name neobank_web_model)
- (libraries core zarith neobank-api-types)
+ (libraries core zarith yojson ppx_yojson_conv_lib neobank-api-types)
  (preprocess
-  (pps ppx_jane)))
+  (pps ppx_jane ppx_yojson_conv)))
