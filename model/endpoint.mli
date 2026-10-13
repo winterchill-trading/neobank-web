@@ -35,8 +35,8 @@ val unfreeze_card : string -> string
 val card_limits : string -> string
 val pan_token : string -> string
 
-(** Settings for the provider's card display component (script, application id, UI
-    secret, the provider's ids of user and card). *)
+(** Settings for the provider's card display component (script, application id, UI secret,
+    the provider's ids of user and card). *)
 val card_display : string -> string
 
 (** Tells the API the challenge the card display component started. *)

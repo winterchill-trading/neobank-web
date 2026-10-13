@@ -45,8 +45,7 @@ let%expect_test "signed amounts from the API" =
     ~f:(fun a ->
       let z = Units.of_amount a |> Or_error.ok_exn in
       print_endline (Units.to_string ~currency:a.currency z));
-  [%expect
-    {|
+  [%expect {|
     -12.50
     0
     |}]

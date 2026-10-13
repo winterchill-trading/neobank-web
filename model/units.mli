@@ -15,8 +15,8 @@ val parse : currency:string -> string -> t Or_error.t
 (** [parse] that also refuses zero. *)
 val parse_positive : currency:string -> string -> t Or_error.t
 
-(** Plain decimal text the API accepts: fiat with exactly its decimals (["12.30"]),
-    crypto without trailing zeros (["0.015"], ["2"]). Negative amounts get a ['-']. *)
+(** Plain decimal text the API accepts: fiat with exactly its decimals (["12.30"]), crypto
+    without trailing zeros (["0.015"], ["2"]). Negative amounts get a ['-']. *)
 val to_string : currency:string -> t -> string
 
 val of_amount : Api_types.Amount.t -> t Or_error.t

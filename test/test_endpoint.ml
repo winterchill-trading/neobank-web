@@ -16,9 +16,7 @@ let%expect_test "ids and dates are escaped" =
 ;;
 
 let%expect_test "no route is listed twice" =
-  let dups =
-    List.find_all_dups Endpoint.all ~compare:[%compare: string * string]
-  in
+  let dups = List.find_all_dups Endpoint.all ~compare:[%compare: string * string] in
   print_s [%sexp (dups : (string * string) list)];
   [%expect {| () |}]
 ;;

@@ -28,7 +28,11 @@ let%expect_test "quoting and formula guard" =
         ]
     }
   in
-  print_string (String.substr_replace_all (Statement_csv.to_string statement) ~pattern:"\r\n" ~with_:"\n");
+  print_string
+    (String.substr_replace_all
+       (Statement_csv.to_string statement)
+       ~pattern:"\r\n"
+       ~with_:"\n");
   print_endline (Statement_csv.file_name statement);
   [%expect
     {|

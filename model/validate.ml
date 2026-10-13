@@ -41,7 +41,10 @@ let bic s =
   else fail "a BIC has 8 or 11 characters, the first six letters"
 ;;
 
-let base58 c = Char.is_alphanum c && not (List.mem [ '0'; 'O'; 'I'; 'l' ] c ~equal:Char.equal)
+let base58 c =
+  Char.is_alphanum c && not (List.mem [ '0'; 'O'; 'I'; 'l' ] c ~equal:Char.equal)
+;;
+
 let between lo hi s = String.length s >= lo && String.length s <= hi
 
 let address ~network s =
@@ -102,9 +105,7 @@ let totp s =
   else fail "enter the 6-digit code from your authenticator app"
 ;;
 
-let password s =
-  if String.length s >= 12 then Ok s else fail "use at least 12 characters"
-;;
+let password s = if String.length s >= 12 then Ok s else fail "use at least 12 characters"
 
 let date s =
   let s = String.strip s in

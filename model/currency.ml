@@ -54,15 +54,12 @@ let all =
   ]
 ;;
 
-let find code =
-  List.find all ~f:(fun c -> String.Caseless.equal c.code code)
-;;
+let find code = List.find all ~f:(fun c -> String.Caseless.equal c.code code)
 
 let get code =
   match find code with
   | Some c -> c
-  | None ->
-    { code; name = code; exponent = 2; kind = Fiat; symbol = None; networks = [] }
+  | None -> { code; name = code; exponent = 2; kind = Fiat; symbol = None; networks = [] }
 ;;
 
 let is_crypto code =

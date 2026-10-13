@@ -16,7 +16,9 @@ let parse ~currency text =
     | None -> text, ""
     | Some (i, f) -> i, f
   in
-  let int_digits = String.filter int_part ~f:(fun c -> not (Char.equal c ',' || Char.equal c '_')) in
+  let int_digits =
+    String.filter int_part ~f:(fun c -> not (Char.equal c ',' || Char.equal c '_'))
+  in
   let all_digits s = String.for_all s ~f:Char.is_digit in
   if String.is_empty int_digits && String.is_empty frac_part
   then error "enter an amount"
@@ -71,4 +73,6 @@ let of_amount ({ amount; currency } : Api_types.Amount.t) =
   if negative then Z.neg z else z
 ;;
 
-let to_amount ~currency z : Api_types.Amount.t = { amount = to_string ~currency z; currency }
+let to_amount ~currency z : Api_types.Amount.t =
+  { amount = to_string ~currency z; currency }
+;;

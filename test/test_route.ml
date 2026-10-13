@@ -46,8 +46,7 @@ let%expect_test "every route round-trips through its fragment" =
 let%expect_test "unknown fragments land on the dashboard" =
   List.iter [ ""; "#"; "#/nope"; "/accounts/a/b" ] ~f:(fun h ->
     print_s [%sexp (Route.of_hash h : Route.t)]);
-  [%expect
-    {|
+  [%expect {|
     Dashboard
     Dashboard
     Dashboard

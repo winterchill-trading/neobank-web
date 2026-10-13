@@ -27,8 +27,8 @@ let%expect_test "IBAN" =
     |}]
 ;;
 
-(* Changing any single digit of a valid IBAN breaks mod 97: 10^k mod 97 is never 0, so
-   the remainder moves by a non-zero multiple. *)
+(* Changing any single digit of a valid IBAN breaks mod 97: 10^k mod 97 is never 0, so the
+   remainder moves by a non-zero multiple. *)
 let%test_unit "a single changed digit is caught" =
   let valid = "DE89370400440532013000" in
   Quickcheck.test
@@ -80,7 +80,9 @@ let%expect_test "addresses" =
     ; "BTC", "0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe"
     ; "ETH", "0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe"
     ; "ETH", "0x1234"
-    ; "LIGHTNING", "lightning:LNTB10U1PJ9X7ZPP5QQQSYQCYQ5RQWZQFQQQSYQCYQ5RQWZQFQQQSYQCYQ5RQWZQFQYPQ"
+    ; ( "LIGHTNING"
+      , "lightning:LNTB10U1PJ9X7ZPP5QQQSYQCYQ5RQWZQFQQQSYQCYQ5RQWZQFQQQSYQCYQ5RQWZQFQYPQ"
+      )
     ; "LIGHTNING", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
     ; "SOL", "4Nd1mBQtrMJVYVfKf2PJy9NZUZdTAsp7D4xWLs4gDB4T"
     ; "DOGE", "D"

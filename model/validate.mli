@@ -4,8 +4,8 @@
 
 open! Core
 
-(** ISO 13616: country code, two check digits, up to 30 letters or digits, and the
-    mod-97 check. Spaces are dropped and letters upper-cased. *)
+(** ISO 13616: country code, two check digits, up to 30 letters or digits, and the mod-97
+    check. Spaces are dropped and letters upper-cased. *)
 val iban : string -> string Or_error.t
 
 (** 8 or 11 characters: bank (4 letters), country (2 letters), location, branch. *)

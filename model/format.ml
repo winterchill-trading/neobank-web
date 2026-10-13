@@ -18,9 +18,7 @@ let amount_text ~plus (a : Api_types.Amount.t) =
       | None -> text, ""
     in
     let number = group_thousands int_part ^ frac in
-    let sign =
-      if Z.lt z Z.zero then "-" else if plus && Z.gt z Z.zero then "+" else ""
-    in
+    let sign = if Z.lt z Z.zero then "-" else if plus && Z.gt z Z.zero then "+" else "" in
     (match (Currency.get a.currency).symbol with
      | Some symbol -> sign ^ symbol ^ number
      | None -> sign ^ number ^ " " ^ a.currency)

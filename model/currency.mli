@@ -1,5 +1,5 @@
-(** Currencies the app knows how to show and parse. Amounts travel as decimal strings
-    (see [Api_types.Amount]); the exponent says how many decimals a currency allows. *)
+(** Currencies the app knows how to show and parse. Amounts travel as decimal strings (see
+    [Api_types.Amount]); the exponent says how many decimals a currency allows. *)
 
 open! Core
 
