@@ -1,0 +1,8 @@
+(library
+ (name neobank_web_test)
+ (inline_tests
+  (flags
+   (:standard -source-tree-root .)))
+ (libraries core zarith yojson neobank-api-types neobank_web_model)
+ (preprocess
+  (pps ppx_jane)))

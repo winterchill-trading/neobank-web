@@ -1,0 +1,8 @@
+; Plain OCaml shared by the browser app and the native tests: routes, amounts, form
+; validation, QR codes and the mock bank. Nothing here touches the DOM.
+
+(library
+ (name neobank_web_model)
+ (libraries core zarith neobank-api-types)
+ (preprocess
+  (pps ppx_jane)))
