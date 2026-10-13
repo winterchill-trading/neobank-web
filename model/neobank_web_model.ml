@@ -5,3 +5,4 @@ module Units = Units
 module Format = Format
 module Validate = Validate
 module Route = Route
+module Endpoint = Endpoint
