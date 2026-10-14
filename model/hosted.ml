@@ -4,7 +4,9 @@ open! Core
 let kyc_sdk_script = "https://static.sumsub.com/idensic/static/sns-websdk-builder.js"
 
 (* https://docs.striga.com/reference/methods ("Striga JS client SDK") *)
-let card_plugin_sandbox_script = "https://www.vault.striga.eu/web/sandbox/v1.1/client.min.js"
+let card_plugin_sandbox_script =
+  "https://www.vault.striga.eu/web/sandbox/v1.1/client.min.js"
+;;
 
 module Card_display = struct
   open Ppx_yojson_conv_lib.Yojson_conv.Primitives

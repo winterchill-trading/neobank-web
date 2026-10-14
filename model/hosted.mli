@@ -1,5 +1,5 @@
-(** Settings for the provider components embedded in two pages, and the documented URLs
-    of their scripts. The scripts are loaded only on those pages (onboarding and cards),
+(** Settings for the provider components embedded in two pages, and the documented URLs of
+    their scripts. The scripts are loaded only on those pages (onboarding and cards),
     never at startup.
 
     - Identity checks: the provider runs them in a KYC vendor's Web SDK (WebSDK 2.0); the

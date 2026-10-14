@@ -1,7 +1,9 @@
 open! Core
 open Neobank_web_model
 
-let show status body = print_s [%sexp (Api_failure.of_response ~status body : Api_failure.t)]
+let show status body =
+  print_s [%sexp (Api_failure.of_response ~status body : Api_failure.t)]
+;;
 
 let%expect_test "answers the API refuses with" =
   show 422 {|{"error":"insufficient_funds","message":"not enough money","extra":1}|};
@@ -27,8 +29,7 @@ let%expect_test "answers the API refuses with" =
 let%expect_test "clock text" =
   print_endline (Clock.iso 1_760_430_612_123.);
   print_endline (Clock.date 1_760_430_612_123.);
-  [%expect
-    {|
+  [%expect {|
     2025-10-14T08:30:12.123Z
     2025-10-14
     |}]
