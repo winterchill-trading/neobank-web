@@ -55,7 +55,7 @@ token, come from the API at runtime.
 | `#/standing-orders` | Daily, weekly or monthly orders, confirmed with the provider's code |
 | `#/statements` | Any account and period; CSV download built in the browser |
 | `#/beneficiaries` | Payees with the IBAN check, the name check result and trust |
-| `#/review` | Operators: approve or reject held payments (needs the ops token) |
+| `#/review` | Operators: two different operators approve a held payment, one may reject it (needs the ops token) |
 
 Any action the API refuses with `sca_required` (its 5-minute window for sensitive
 operations has passed) shows a password and code form in place; after the step-up the
@@ -72,7 +72,8 @@ on first use (URLs in `model/hosted.ml`, glue in `ui/hosted_js.ml`):
   route when it expires. Results reach the API by webhook, so the page polls the status.
 - **Card number, CVV and PIN** are drawn by the provider's card display plugin in its own
   iframes. The plugin is created with the application id and UI secret from
-  `GET /cards/:id/display`, asks for consent (`requestConsent`: the provider sends the
+  `GET /cards/:id/display` (the fake provider answers with no component, and the page
+  stops after the token), asks for consent (`requestConsent`: the provider sends the
   customer a code), the API learns the challenge (`POST /cards/:id/consent`), the
   customer's code goes to `POST /sca/:id`, `POST /cards/:id/pan-token` returns the
   token, and the plugin renders with it. Neither this app nor the API ever sees the
@@ -92,7 +93,7 @@ A deployment with a Content-Security-Policy must allow those two script hosts in
 | `POST /transfers/quote`, `GET/POST /transfers`, `GET /transfers/:id`, `POST /transfers/:id/confirm-sca`, `/sca`, `/cancel` | send, payment | yes |
 | `POST /swaps/quote`, `GET /swaps`, `POST /swaps/:id/execute` | swap | yes |
 | `GET/POST /cards`, `POST /cards/:id/freeze`, `/unfreeze`, `/limits`, `/pan-token` | cards | yes |
-| `GET /cards/:id/display`, `POST /cards/:id/consent` | card details with the provider's plugin | **no** (see Known gaps) |
+| `GET /cards/:id/display`, `POST /cards/:id/consent` | card details with the provider's plugin | yes |
 | `GET/POST /standing-orders`, `DELETE /standing-orders/:id` | standing orders | yes |
 | `POST /sca/:id` | provider codes for swaps, orders, card details | yes |
 | `GET /ops/review`, `POST /ops/review/:id` | review queue | yes |
@@ -115,7 +116,7 @@ Every `POST` outside `/auth` carries a fresh `Idempotency-Key`.
   sibling neobank-api, starts it on the fake provider with the memory store and runs
   it: 9 steps over real HTTP (sign-up with computed authenticator codes, KYC with the
   sandbox decision, deposit, SEPA payment with SCA, swap, card with the provider's code,
-  standing order, statement CSV, a held payment released by an operator).
+  standing order, statement CSV, a held payment released by two operators).
 
 What is verified where: everything above runs against the mock and against neobank-api
 on its fake provider. The two provider components are not exercised by any test: the
@@ -124,10 +125,6 @@ the real sandbox.
 
 ## Known gaps
 
-- neobank-api has no `GET /cards/:id/display` (application id, UI secret, the
-  provider's user and card ids) or `POST /cards/:id/consent` (the challenge the plugin
-  started) yet, so against the real provider the card details stop after the token; on
-  the fake provider the page explains that it has no display component.
 - The API's hosted KYC session carries no SDK script URL, so the app uses the vendor's
   documented WebSDK URL.
 - No test drives the real identity SDK or card plugin (they need a browser and the
