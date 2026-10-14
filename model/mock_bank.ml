@@ -924,6 +924,18 @@ let confirm_sca t ~now ~token id (r : A.Transfer.Confirm_request.t) =
   owned_transfer t c id
 ;;
 
+let restart_sca t ~now ~token id =
+  let%bind.Result c = customer_of_token t ~token in
+  let%bind.Result tr = owned_transfer t c id in
+  match tr.status with
+  | "awaiting_sca" when Option.is_some tr.sca || Option.is_none tr.provider_sca ->
+    Option.iter tr.sca ~f:(fun s -> Hashtbl.remove t.challenges s.challenge_id);
+    let tr = ask_sca t ~now tr in
+    replace_transfer t tr;
+    Ok tr
+  | _ -> fail 409 "no_challenge" "this payment is not waiting for a code"
+;;
+
 let cancel_transfer t ~now ~token id =
   let%bind.Result c = customer_of_token t ~token in
   let%bind.Result tr = owned_transfer t c id in

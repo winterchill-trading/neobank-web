@@ -102,6 +102,9 @@ val confirm_sca
   -> A.Transfer.Confirm_request.t
   -> A.Transfer.t r
 
+(** A fresh challenge when the first one expired. *)
+val restart_sca : t -> now:float -> token:string -> string -> A.Transfer.t r
+
 val cancel_transfer : t -> now:float -> token:string -> string -> A.Transfer.t r
 
 (** {2 Swaps} *)
