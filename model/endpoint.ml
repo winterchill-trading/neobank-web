@@ -55,6 +55,7 @@ let provider_sca id = "/sca/" ^ esc id
 let reviews = "/ops/review"
 let review_decision id = "/ops/review/" ^ esc id
 let sandbox_deposit = "/sandbox/deposit"
+let sandbox_kyc_decision = "/sandbox/kyc-decision"
 let ws ~token = "/ws?token=" ^ esc token
 
 let all =
@@ -97,6 +98,7 @@ let all =
   ; "GET", reviews
   ; "POST", review_decision ":id"
   ; "POST", sandbox_deposit
+  ; "POST", sandbox_kyc_decision
   ; "GET", "/ws?token=<token>"
   ]
 ;;

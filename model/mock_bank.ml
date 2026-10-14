@@ -529,6 +529,25 @@ let kyc_complete t ~now ~token (r : A.Kyc.Complete_request.t) =
     Ok c.kyc)
 ;;
 
+let kyc_decision t ~now ~token (d : A.Sandbox.Kyc_decision.t) =
+  let%bind.Result c = customer_of_token t ~token in
+  match d.decision with
+  | "approve" ->
+    c.kyc <- { c.kyc with status = "active"; tier = "T1"; steps_to_complete = [] };
+    if List.is_empty c.account_ids
+    then
+      List.iter currencies ~f:(fun currency ->
+        ignore (open_account t c ~currency ~now : account));
+    Ok c.kyc
+  | "reject" ->
+    c.kyc <- { c.kyc with status = "declined"; steps_to_complete = [] };
+    Ok c.kyc
+  | "resubmit" ->
+    c.kyc <- { c.kyc with status = "action_required"; fields_to_resubmit = [ "address" ] };
+    Ok c.kyc
+  | _ -> fail 400 "invalid_request" "decision is approve, reject or resubmit"
+;;
+
 (* {2 Accounts} *)
 
 let accounts t ~token =

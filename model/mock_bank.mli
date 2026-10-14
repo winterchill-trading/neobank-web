@@ -52,6 +52,14 @@ val kyc_complete
   -> A.Kyc.Complete_request.t
   -> A.Kyc.Status.t r
 
+(** The sandbox's decision on the whole case: [approve] finishes every open step. *)
+val kyc_decision
+  :  t
+  -> now:float
+  -> token:string
+  -> A.Sandbox.Kyc_decision.t
+  -> A.Kyc.Status.t r
+
 (** {2 Accounts} *)
 
 val accounts : t -> token:string -> A.Account.t list r

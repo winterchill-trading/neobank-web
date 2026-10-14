@@ -51,6 +51,7 @@ val provider_sca : string -> string
 val reviews : string
 val review_decision : string -> string
 val sandbox_deposit : string
+val sandbox_kyc_decision : string
 
 (** The websocket for pushes; the token travels in the query string because browsers
     cannot set headers on a websocket. *)
