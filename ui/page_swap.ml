@@ -28,7 +28,13 @@ let component (page : Page.t) (local_ graph) =
   let quote, set_quote = Bonsai.state_opt graph in
   let action = Action.component ~backend:page.backend ~session:page.session graph in
   let now = Bonsai.Clock.approx_now ~tick_every:(Time_ns.Span.of_sec 1.) graph in
-  let%map data and form and set_form and quote and set_quote and action and session = page.session
+  let%map data
+  and form
+  and set_form
+  and quote
+  and set_quote
+  and action
+  and session = page.session
   and bump = page.bump
   and now in
   match session with
@@ -78,7 +84,9 @@ let component (page : Page.t) (local_ graph) =
                 [ Widgets.stat ~label:"You sell" (Format.amount q.sell)
                 ; Widgets.stat ~label:"Fee" (Format.amount q.fee)
                 ; Widgets.stat ~label:"You get" (Format.amount q.buy)
-                ; Widgets.stat ~label:"Price" (q.price ^ " " ^ q.buy.currency ^ " per " ^ q.sell.currency)
+                ; Widgets.stat
+                    ~label:"Price"
+                    (q.price ^ " " ^ q.buy.currency ^ " per " ^ q.sell.currency)
                 ; Widgets.stat
                     ~label:"Valid for"
                     (match left with
@@ -102,7 +110,9 @@ let component (page : Page.t) (local_ graph) =
                            (Done
                               (match s.status with
                                | "executed" -> "Swapped."
-                               | "awaiting_sca" -> "The bank sent you a code to confirm the swap; see below."
+                               | "awaiting_sca" ->
+                                 "The bank sent you a code to confirm the swap; see \
+                                  below."
                                | _ -> "Swap sent; the balances update when it completes."))
                        in
                        bump))
@@ -134,9 +144,14 @@ let component (page : Page.t) (local_ graph) =
                     ~form
                     ~set:set_form
                     ~name:"sell"
-                    ~label:("Amount to sell" ^ Option.value_map from ~default:"" ~f:(fun a -> " in " ^ a.currency))
+                    ~label:
+                      ("Amount to sell"
+                       ^ Option.value_map from ~default:"" ~f:(fun a ->
+                         " in " ^ a.currency))
                     ?error:
-                      (if String.is_empty (Form.get form "sell") then None else Form.error_of request)
+                      (if String.is_empty (Form.get form "sell")
+                       then None
+                       else Form.error_of request)
                     ()
                 ]
             ; Widgets.button
@@ -154,9 +169,16 @@ let component (page : Page.t) (local_ graph) =
             ; quote_view
             ; action.view
             ]
-        ; Provider_code.view ~page ~token ~bump ~action ~form ~set_form
+        ; Provider_code.view
+            ~page
+            ~token
+            ~bump
+            ~action
+            ~form
+            ~set_form
             (List.map pending ~f:(fun (s : Api_types.Swap.t) ->
-               sprintf "Swap of %s" (Format.amount s.sell), Option.value_exn s.provider_sca))
+               ( sprintf "Swap of %s" (Format.amount s.sell)
+               , Option.value_exn s.provider_sca )))
         ; Widgets.section
             "Past swaps"
             [ (if List.is_empty swaps

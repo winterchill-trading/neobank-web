@@ -19,14 +19,20 @@ let header ~(backend : Backend.t) ~route ~session ~logout =
                 r
                 [ N.text (Route.title r) ])))
     ; N.span
-        ~attrs:[ A.classes [ "badge"; (if backend.is_mock then "mock" else "live") ]; A.id "backend" ]
+        ~attrs:
+          [ A.classes [ "badge"; (if backend.is_mock then "mock" else "live") ]
+          ; A.id "backend"
+          ]
         [ N.text backend.description ]
     ; (match session with
        | None ->
          N.div
            ~attrs:[ A.class_ "account" ]
            [ Widgets.link ~attrs:[ A.class_ "btn" ] Sign_in [ N.text "Sign in" ]
-           ; Widgets.link ~attrs:[ A.classes [ "btn"; "primary" ] ] Sign_up [ N.text "Open an account" ]
+           ; Widgets.link
+               ~attrs:[ A.classes [ "btn"; "primary" ] ]
+               Sign_up
+               [ N.text "Open an account" ]
            ]
        | Some _ ->
          N.div
@@ -40,7 +46,9 @@ let header ~(backend : Backend.t) ~route ~session ~logout =
 let component ~(backend : Backend.t) ~route (local_ graph) =
   let open Bonsai.Let_syntax in
   let restored = if backend.is_mock then None else Session.restore () in
-  let session, set_session = Bonsai.state restored ~equal:[%equal: Session.t option] graph in
+  let session, set_session =
+    Bonsai.state restored ~equal:[%equal: Session.t option] graph
+  in
   let refresh, set_refresh = Bonsai.state 0 graph in
   let bump =
     let%map refresh and set_refresh in
@@ -53,15 +61,21 @@ let component ~(backend : Backend.t) ~route (local_ graph) =
     fun (s : Session.t option) ->
       Effect.of_thunk (fun () ->
         !closer ();
-        closer := fun () -> ();
-        match s with
-        | None -> ()
-        | Some s ->
-          closer
-          := backend.subscribe ~token:s.token ~on_push:(fun _ ->
-               Effect.Expert.handle_non_dom_event_exn bump))
+        closer
+        := fun () ->
+             ();
+             match s with
+             | None -> ()
+             | Some s ->
+               closer
+               := backend.subscribe ~token:s.token ~on_push:(fun _ ->
+                    Effect.Expert.handle_non_dom_event_exn bump))
   in
-  Bonsai.Edge.on_change ~equal:[%equal: Session.t option] session ~callback:push_callback graph;
+  Bonsai.Edge.on_change
+    ~equal:[%equal: Session.t option]
+    session
+    ~callback:push_callback
+    graph;
   let page : Page.t = { backend; session; refresh; bump; route } in
   let login =
     let%map set_session in
@@ -83,9 +97,23 @@ let component ~(backend : Backend.t) ~route (local_ graph) =
   let statements = Page_statements.component page graph in
   let beneficiaries = Page_beneficiaries.component page graph in
   let review = Page_review.component page graph in
-  let%map route and session and set_session and sign_in and sign_up and onboarding
-  and dashboard and accounts and account and send and transfer and swap and cards
-  and standing_orders and statements and beneficiaries and review in
+  let%map route
+  and session
+  and set_session
+  and sign_in
+  and sign_up
+  and onboarding
+  and dashboard
+  and accounts
+  and account
+  and send
+  and transfer
+  and swap
+  and cards
+  and standing_orders
+  and statements
+  and beneficiaries
+  and review in
   let logout =
     let open Effect.Let_syntax in
     let%bind () =

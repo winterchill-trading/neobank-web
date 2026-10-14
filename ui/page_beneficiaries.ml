@@ -43,7 +43,12 @@ let component (page : Page.t) (local_ graph) =
   in
   let form, set_form = Form.state ~init:[ "rail", "sepa" ] graph in
   let action = Action.component ~backend:page.backend ~session:page.session graph in
-  let%map list and form and set_form and action and session = page.session and bump = page.bump in
+  let%map list
+  and form
+  and set_form
+  and action
+  and session = page.session
+  and bump = page.bump in
   match session with
   | None -> Page.signed_out
   | Some { token; _ } ->
@@ -65,7 +70,9 @@ let component (page : Page.t) (local_ graph) =
       ; memo = None
       }
     in
-    let shown field r = if String.is_empty (Form.get form field) then None else Form.error_of r in
+    let shown field r =
+      if String.is_empty (Form.get form field) then None else Form.error_of r
+    in
     let trust (b : Api_types.Beneficiary.t) =
       Widgets.button
         ~id:("trust-" ^ b.id)
@@ -98,7 +105,8 @@ let component (page : Page.t) (local_ graph) =
                               else Format.short ~keep:10 b.destination)
                          ]
                      ; N.text (String.concat ~sep:", " (List.map b.rails ~f:rail_label))
-                     ; N.text (Option.value_map b.payee_check ~default:"-" ~f:Format.status)
+                     ; N.text
+                         (Option.value_map b.payee_check ~default:"-" ~f:Format.status)
                      ; (if b.trusted then Widgets.badge "trusted" else trust b)
                      ])))
           ; action.view
@@ -108,7 +116,13 @@ let component (page : Page.t) (local_ graph) =
           "Add a payee"
           [ N.div
               ~attrs:[ A.class_ "form-grid" ]
-              [ Form.input ~form ~set:set_form ~name:"name" ~label:"Name" ?error:(shown "name" name) ()
+              [ Form.input
+                  ~form
+                  ~set:set_form
+                  ~name:"name"
+                  ~label:"Name"
+                  ?error:(shown "name" name)
+                  ()
               ; Form.select ~form ~set:set_form ~name:"rail" ~label:"Type" rails
               ; Form.input
                   ~form
@@ -150,9 +164,13 @@ let component (page : Page.t) (local_ graph) =
                          action.set
                            (Done
                               (match b.payee_check with
-                               | Some "match" -> "Added. The name matches the account holder."
-                               | Some "close_match" -> "Added. The name is close to the account holder's; check it."
-                               | Some "no_match" -> "Added, but the name does not match the account holder."
+                               | Some "match" ->
+                                 "Added. The name matches the account holder."
+                               | Some "close_match" ->
+                                 "Added. The name is close to the account holder's; \
+                                  check it."
+                               | Some "no_match" ->
+                                 "Added, but the name does not match the account holder."
                                | _ -> "Added."))
                        in
                        bump))

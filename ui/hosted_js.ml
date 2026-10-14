@@ -36,8 +36,12 @@ let error_of_js what (e : Js.Unsafe.any) =
 let of_promise ~what (p : Js.Unsafe.any) : Js.Unsafe.any Or_error.t Deferred.t =
   let ivar = Ivar.create () in
   let ok = Js.wrap_callback (fun v -> Ivar.fill_if_empty ivar (Ok v)) in
-  let err = Js.wrap_callback (fun e -> Ivar.fill_if_empty ivar (Error (error_of_js what e))) in
-  ignore (Js.Unsafe.meth_call p "then" [| Js.Unsafe.inject ok; Js.Unsafe.inject err |] : Js.Unsafe.any);
+  let err =
+    Js.wrap_callback (fun e -> Ivar.fill_if_empty ivar (Error (error_of_js what e)))
+  in
+  ignore
+    (Js.Unsafe.meth_call p "then" [| Js.Unsafe.inject ok; Js.Unsafe.inject err |]
+     : Js.Unsafe.any);
   Ivar.read ivar
 ;;
 
@@ -74,7 +78,8 @@ module Kyc_sdk = struct
                       (Js.wrap_callback (fun resolve reject ->
                          upon (refresh ()) (function
                            | Ok token -> Js.Unsafe.fun_call resolve [| str token |]
-                           | Error e -> Js.Unsafe.fun_call reject [| str (Error.to_string_hum e) |])))
+                           | Error e ->
+                             Js.Unsafe.fun_call reject [| str (Error.to_string_hum e) |])))
                  |])
            in
            let builder =
@@ -110,11 +115,14 @@ module Kyc_sdk = struct
                    b
                    "on"
                    [| str event
-                    ; Js.Unsafe.inject (Js.wrap_callback (fun (_ : Js.Unsafe.any) -> on_message event))
+                    ; Js.Unsafe.inject
+                        (Js.wrap_callback (fun (_ : Js.Unsafe.any) -> on_message event))
                    |])
            in
            let instance = Js.Unsafe.meth_call builder "build" [||] in
-           ignore (Js.Unsafe.meth_call instance "launch" [| str ("#" ^ container) |] : Js.Unsafe.any)))
+           ignore
+             (Js.Unsafe.meth_call instance "launch" [| str ("#" ^ container) |]
+              : Js.Unsafe.any)))
   ;;
 end
 
@@ -136,7 +144,8 @@ module Card_plugin = struct
               p
               "create"
               [| str d.ui_secret
-               ; Js.Unsafe.inject (Js.Unsafe.obj [| "applicationId", str d.application_id |])
+               ; Js.Unsafe.inject
+                   (Js.Unsafe.obj [| "applicationId", str d.application_id |])
               |]
             : Js.Unsafe.any)))
   ;;

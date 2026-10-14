@@ -96,7 +96,9 @@ let component (page : Page.t) (local_ graph) =
   | None ->
     let req = request form in
     let error name =
-      if String.is_empty (Form.get form name) then None else Form.error_of (check form name)
+      if String.is_empty (Form.get form name)
+      then None
+      else Form.error_of (check form name)
     in
     let submit =
       match req with

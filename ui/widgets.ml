@@ -18,7 +18,8 @@ let button ?id ?(primary = false) ?(danger = false) ?(disabled = false) ~on_clic
              (A.classes
                 ("btn"
                  :: List.filter_opt
-                      [ Option.some_if primary "primary"; Option.some_if danger "danger" ]))
+                      [ Option.some_if primary "primary"; Option.some_if danger "danger" ]
+                ))
          ; Some (A.disabled' disabled)
          ; Some (A.on_click (fun _ -> on_click))
          ])
@@ -57,11 +58,14 @@ let stat ~label value =
 let stats children = N.div ~attrs:[ A.class_ "stats" ] children
 
 let table ?id ~header ~numeric rows =
-  let cell_attrs i = if List.mem numeric i ~equal:Int.equal then [ A.class_ "num" ] else [] in
+  let cell_attrs i =
+    if List.mem numeric i ~equal:Int.equal then [ A.class_ "num" ] else []
+  in
   N.table
     ~attrs:(A.class_ "grid" :: Option.to_list (Option.map id ~f:A.id))
     [ N.thead
-        [ N.tr (List.mapi header ~f:(fun i h -> N.th ~attrs:(cell_attrs i) [ N.text h ])) ]
+        [ N.tr (List.mapi header ~f:(fun i h -> N.th ~attrs:(cell_attrs i) [ N.text h ]))
+        ]
     ; N.tbody
         (List.map rows ~f:(fun cells ->
            N.tr (List.mapi cells ~f:(fun i c -> N.td ~attrs:(cell_attrs i) [ c ]))))

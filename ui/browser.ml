@@ -7,7 +7,9 @@ let now_ms () = Js.to_float (new%js Js.date_now)##getTime
 let random_id () =
   let bytes : Typed_array.uint8Array Js.t = new%js Typed_array.uint8Array 16 in
   let crypto = Js.Unsafe.global##.crypto in
-  ignore (Js.Unsafe.meth_call crypto "getRandomValues" [| Js.Unsafe.inject bytes |] : Js.Unsafe.any);
+  ignore
+    (Js.Unsafe.meth_call crypto "getRandomValues" [| Js.Unsafe.inject bytes |]
+     : Js.Unsafe.any);
   String.concat
     (List.init 16 ~f:(fun i -> sprintf "%02x" (Typed_array.unsafe_get bytes i)))
 ;;

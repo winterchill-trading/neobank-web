@@ -6,7 +6,9 @@ open Neobank_web_model
 module N = Vdom.Node
 module A = Vdom.Attr
 
-let kinds = [ "sepa", "Bank transfer (SEPA)"; "crypto", "Crypto"; "lightning", "Lightning" ]
+let kinds =
+  [ "sepa", "Bank transfer (SEPA)"; "crypto", "Crypto"; "lightning", "Lightning" ]
+;;
 
 let account_fits ~kind (a : Api_types.Account.t) =
   match kind with
@@ -20,7 +22,8 @@ let onchain_rail (a : Api_types.Account.t) =
   "onchain:" ^ String.lowercase (Option.value a.network ~default:a.currency)
 ;;
 
-let payee_fits ~kind ~(account : Api_types.Account.t option) (b : Api_types.Beneficiary.t) =
+let payee_fits ~kind ~(account : Api_types.Account.t option) (b : Api_types.Beneficiary.t)
+  =
   let has r = List.mem b.rails r ~equal:String.equal in
   match kind with
   | "sepa" -> has "sepa" || has "sepa_instant"
@@ -52,7 +55,13 @@ let component (page : Page.t) (local_ graph) =
   let form, set_form = Form.state ~init:[ "kind", "sepa"; "rail", "sepa" ] graph in
   let quote, set_quote = Bonsai.state_opt graph in
   let action = Action.component ~backend:page.backend ~session:page.session graph in
-  let%map data and form and set_form and quote and set_quote and action and session = page.session in
+  let%map data
+  and form
+  and set_form
+  and quote
+  and set_quote
+  and action
+  and session = page.session in
   match session with
   | None -> Page.signed_out
   | Some { token; _ } ->
@@ -63,7 +72,9 @@ let component (page : Page.t) (local_ graph) =
         List.find accounts ~f:(fun a -> String.equal a.id (Form.get form "account"))
       in
       let payees = List.filter payees ~f:(payee_fits ~kind ~account) in
-      let payee = List.find payees ~f:(fun b -> String.equal b.id (Form.get form "payee")) in
+      let payee =
+        List.find payees ~f:(fun b -> String.equal b.id (Form.get form "payee"))
+      in
       let rail =
         match kind, account with
         | "sepa", _ -> Form.get form "rail"
@@ -110,7 +121,9 @@ let component (page : Page.t) (local_ graph) =
           action.run
             ~busy:"Asking for the fee..."
             (fun () ->
-              page.backend.fee_quote ~token { account_id = r.account_id; rail; amount = r.amount })
+              page.backend.fee_quote
+                ~token
+                { account_id = r.account_id; rail; amount = r.amount })
             ~on_ok:(fun q -> set_quote (Some q))
       in
       let send =
@@ -123,7 +136,9 @@ let component (page : Page.t) (local_ graph) =
             ~on_ok:(fun (t : Api_types.Transfer.t) ->
               let open Effect.Let_syntax in
               let%bind () = set_quote None in
-              let%bind () = set_form (String.Map.of_alist_exn [ "kind", kind; "rail", "sepa" ]) in
+              let%bind () =
+                set_form (String.Map.of_alist_exn [ "kind", kind; "rail", "sepa" ])
+              in
               Nav.navigate (Transfer t.id))
       in
       Widgets.section
@@ -134,7 +149,8 @@ let component (page : Page.t) (local_ graph) =
             (List.map kinds ~f:(fun (k, label) ->
                N.button
                  ~attrs:
-                   [ A.classes ("tab" :: (if String.equal k kind then [ "active" ] else []))
+                   [ A.classes
+                       ("tab" :: (if String.equal k kind then [ "active" ] else []))
                    ; A.id ("kind-" ^ k)
                    ; A.on_click (fun _ ->
                        set_form (String.Map.of_alist_exn [ "kind", k; "rail", "sepa" ]))
@@ -154,16 +170,20 @@ let component (page : Page.t) (local_ graph) =
                 ; N.select
                     ~attrs:
                       [ A.name "payee"
-                      ; A.on_change (fun _ v -> set_form (Map.set form ~key:"payee" ~data:v))
+                      ; A.on_change (fun _ v ->
+                          set_form (Map.set form ~key:"payee" ~data:v))
                       ]
-                    (N.option ~attrs:[ A.value ""; A.disabled ] [ N.text "Choose a payee" ]
+                    (N.option
+                       ~attrs:[ A.value ""; A.disabled ]
+                       [ N.text "Choose a payee" ]
                      :: List.map payees ~f:(fun (b : Api_types.Beneficiary.t) ->
                        N.option
                          ~attrs:
                            (A.value b.id
-                            :: (if Option.exists payee ~f:(fun p -> String.equal p.id b.id)
-                                then [ A.selected ]
-                                else []))
+                            ::
+                            (if Option.exists payee ~f:(fun p -> String.equal p.id b.id)
+                             then [ A.selected ]
+                             else []))
                          [ N.text b.name ]))
                 ]
             ; (if String.equal kind "sepa"
@@ -179,13 +199,21 @@ let component (page : Page.t) (local_ graph) =
                 ~form
                 ~set:set_form
                 ~name:"amount"
-                ~label:("Amount" ^ Option.value_map account ~default:"" ~f:(fun a -> " in " ^ a.currency))
+                ~label:
+                  ("Amount"
+                   ^ Option.value_map account ~default:"" ~f:(fun a ->
+                     " in " ^ a.currency))
                 ?error:
                   (if String.is_empty (Form.get form "amount") || Option.is_none account
                    then None
                    else Form.error_of amount)
                 ()
-            ; Form.input ~form ~set:set_form ~name:"reference" ~label:"Reference (optional)" ()
+            ; Form.input
+                ~form
+                ~set:set_form
+                ~name:"reference"
+                ~label:"Reference (optional)"
+                ()
             ; (if String.equal kind "crypto"
                then
                  Form.input
@@ -226,7 +254,8 @@ let component (page : Page.t) (local_ graph) =
             ; Widgets.button
                 ~id:"send-submit"
                 ~primary:true
-                ~disabled:(Option.is_none quote || Result.is_error request || Action.busy action)
+                ~disabled:
+                  (Option.is_none quote || Result.is_error request || Action.busy action)
                 ~on_click:send
                 "Continue to confirm"
             ]

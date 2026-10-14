@@ -16,7 +16,9 @@ let component (page : Page.t) (local_ graph) =
   let form, set_form = Form.state ~init:[ "operator", "operator" ] graph in
   let ops_token, set_ops_token = Bonsai.state_opt graph in
   let key =
-    let%map active and ops_token and refresh = page.refresh in
+    let%map active
+    and ops_token
+    and refresh = page.refresh in
     match active, ops_token with
     | true, Some t -> Some (t, refresh)
     | _ -> None
@@ -29,7 +31,12 @@ let component (page : Page.t) (local_ graph) =
       graph
   in
   let action = Action.component ~backend:page.backend ~session:page.session graph in
-  let%map reviews and form and set_form and ops_token and set_ops_token and action
+  let%map reviews
+  and form
+  and set_form
+  and ops_token
+  and set_ops_token
+  and action
   and bump = page.bump in
   let backend = page.backend in
   match ops_token with
@@ -76,7 +83,9 @@ let component (page : Page.t) (local_ graph) =
       "Review queue"
       [ Form.input ~form ~set:set_form ~name:"operator" ~label:"Your operator name" ()
       ; Widgets.remote reviews ~f:(fun reviews ->
-          let pending = List.filter reviews ~f:(fun r -> String.equal r.status "pending") in
+          let pending =
+            List.filter reviews ~f:(fun r -> String.equal r.status "pending")
+          in
           if List.is_empty pending
           then Widgets.notice "Nothing to review."
           else
@@ -86,22 +95,36 @@ let component (page : Page.t) (local_ graph) =
                    ~attrs:[ A.class_ "review-item"; A.id ("review-" ^ r.id) ]
                    [ N.div
                        [ Widgets.badge r.severity
-                       ; N.text (sprintf " Payment %s by customer %s, held %s" r.reference r.customer_id (Format.time r.submitted_at))
+                       ; N.text
+                           (sprintf
+                              " Payment %s by customer %s, held %s"
+                              r.reference
+                              r.customer_id
+                              (Format.time r.submitted_at))
                        ]
                    ; N.ul (List.map r.reasons ~f:(fun reason -> N.li [ N.text reason ]))
-                   ; Form.input ~form ~set:set_form ~name:("note-" ^ r.id) ~label:"Note (optional)" ()
+                   ; Form.input
+                       ~form
+                       ~set:set_form
+                       ~name:("note-" ^ r.id)
+                       ~label:"Note (optional)"
+                       ()
                    ; N.div
                        ~attrs:[ A.class_ "actions" ]
                        [ Widgets.button
                            ~id:("approve-" ^ r.id)
                            ~primary:true
-                           ~disabled:(Action.busy action || String.is_empty (Form.get form "operator"))
+                           ~disabled:
+                             (Action.busy action
+                              || String.is_empty (Form.get form "operator"))
                            ~on_click:(decide r "approve")
                            "Approve"
                        ; Widgets.button
                            ~id:("reject-" ^ r.id)
                            ~danger:true
-                           ~disabled:(Action.busy action || String.is_empty (Form.get form "operator"))
+                           ~disabled:
+                             (Action.busy action
+                              || String.is_empty (Form.get form "operator"))
                            ~on_click:(decide r "reject")
                            "Reject"
                        ]

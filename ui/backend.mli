@@ -1,5 +1,6 @@
-(** Where the app's data comes from: the neobank API over HTTP, or {!Neobank_web_model.Mock_bank}
-    in memory so every page works without a server ([?mock=1]). *)
+(** Where the app's data comes from: the neobank API over HTTP, or
+    {!Neobank_web_model.Mock_bank} in memory so every page works without a server
+    ([?mock=1]). *)
 
 open! Core
 open! Async_kernel
@@ -22,7 +23,8 @@ type t =
   ; kyc_complete : token:string -> A.Kyc.Complete_request.t -> A.Kyc.Status.t res
   ; accounts : token:string -> A.Account.t list res
   ; account : token:string -> string -> A.Account.t res
-  ; statement : token:string -> ?from:string -> ?until:string -> string -> A.Statement.t res
+  ; statement :
+      token:string -> ?from:string -> ?until:string -> string -> A.Statement.t res
   ; deposit : token:string -> A.Sandbox.Deposit.t -> unit res
   ; beneficiaries : token:string -> A.Beneficiary.t list res
   ; add_beneficiary : token:string -> A.Beneficiary.Request.t -> A.Beneficiary.t res
@@ -31,7 +33,8 @@ type t =
   ; create_transfer : token:string -> A.Transfer.Request.t -> A.Transfer.t res
   ; transfers : token:string -> A.Transfer.t list res
   ; transfer : token:string -> string -> A.Transfer.t res
-  ; confirm_sca : token:string -> string -> A.Transfer.Confirm_request.t -> A.Transfer.t res
+  ; confirm_sca :
+      token:string -> string -> A.Transfer.Confirm_request.t -> A.Transfer.t res
   ; restart_sca : token:string -> string -> A.Transfer.t res
   ; cancel_transfer : token:string -> string -> A.Transfer.t res
   ; swap_quote : token:string -> A.Swap.Quote_request.t -> A.Swap.t res
@@ -54,7 +57,8 @@ type t =
   ; cancel_standing_order : token:string -> string -> A.Standing_order.t res
   ; provider_sca : token:string -> string -> A.Sca_confirm_request.t -> unit res
   ; reviews : ops_token:string -> A.Review.t list res
-  ; decide_review : ops_token:string -> string -> A.Review.Decide_request.t -> A.Review.t res
+  ; decide_review :
+      ops_token:string -> string -> A.Review.Decide_request.t -> A.Review.t res
   ; simulated_pan : string -> string option
   (** the digits the mock's stand-in card display shows; [None] when live *)
   ; subscribe : token:string -> on_push:(A.Ws_push.t -> unit) -> unit -> unit

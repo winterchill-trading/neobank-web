@@ -8,9 +8,9 @@ type t =
   }
 [@@deriving sexp, equal]
 
-(** Kept in [sessionStorage] for the live API so a reload keeps the session (the API
-    still ends it after 5 idle minutes); never for the mock, whose bank starts afresh on
-    every load. *)
+(** Kept in [sessionStorage] for the live API so a reload keeps the session (the API still
+    ends it after 5 idle minutes); never for the mock, whose bank starts afresh on every
+    load. *)
 val save : t option -> unit
 
 val restore : unit -> t option

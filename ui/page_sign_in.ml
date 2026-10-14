@@ -27,7 +27,8 @@ let component (page : Page.t) ~login (local_ graph) =
           let open Effect.Let_syntax in
           let%bind () = set_form String.Map.empty in
           let%bind () = login { Session.token = s.token; customer_id = s.customer_id } in
-          Nav.navigate (if String.equal me.kyc.status "active" then Dashboard else Onboarding))
+          Nav.navigate
+            (if String.equal me.kyc.status "active" then Dashboard else Onboarding))
     | _ -> Effect.Ignore
   in
   let shown field result =

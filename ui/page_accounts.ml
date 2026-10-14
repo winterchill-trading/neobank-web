@@ -31,7 +31,8 @@ let list_component (page : Page.t) (local_ graph) =
       (Page.key page ~active)
       graph
   in
-  let%map accounts and session = page.session in
+  let%map accounts
+  and session = page.session in
   match session with
   | None -> Page.signed_out
   | Some _ ->
@@ -86,12 +87,24 @@ let details_view (a : Api_types.Account.t) =
            ~label:
              (if Option.is_some a.iban
               then "IBAN"
-              else sprintf "Send only %s on %s to this address" a.currency (Option.value a.network ~default:a.currency))
+              else
+                sprintf
+                  "Send only %s on %s to this address"
+                  a.currency
+                  (Option.value a.network ~default:a.currency))
            payload)
     ]
 ;;
 
-let deposit_view ~(action : Action.t) ~form ~set_form ~(a : Api_types.Account.t) ~token ~(backend : Backend.t) ~bump =
+let deposit_view
+  ~(action : Action.t)
+  ~form
+  ~set_form
+  ~(a : Api_types.Account.t)
+  ~token
+  ~(backend : Backend.t)
+  ~bump
+  =
   let amount = Units.parse_positive ~currency:a.currency (Form.get form "deposit") in
   N.div
     ~attrs:[ A.class_ "sandbox" ]
@@ -103,7 +116,10 @@ let deposit_view ~(action : Action.t) ~form ~set_form ~(a : Api_types.Account.t)
             ~set:set_form
             ~name:"deposit"
             ~label:("Amount in " ^ a.currency)
-            ?error:(if String.is_empty (Form.get form "deposit") then None else Form.error_of amount)
+            ?error:
+              (if String.is_empty (Form.get form "deposit")
+               then None
+               else Form.error_of amount)
             ()
         ]
     ; Widgets.button
@@ -118,11 +134,16 @@ let deposit_view ~(action : Action.t) ~form ~set_form ~(a : Api_types.Account.t)
                (fun () ->
                  backend.deposit
                    ~token
-                   { account_id = a.id; amount = Units.to_amount ~currency:a.currency units; rail = None })
+                   { account_id = a.id
+                   ; amount = Units.to_amount ~currency:a.currency units
+                   ; rail = None
+                   })
                ~on_ok:(fun () ->
                  let open Effect.Let_syntax in
                  let%bind () = set_form String.Map.empty in
-                 let%bind () = action.set (Done "Deposit sent; it shows once the bank books it.") in
+                 let%bind () =
+                   action.set (Done "Deposit sent; it shows once the bank books it.")
+                 in
                  bump))
         "Simulate deposit"
     ]
@@ -137,7 +158,8 @@ let detail_component (page : Page.t) (local_ graph) =
     | _ -> None
   in
   let key =
-    let%map account_id and key = Page.key page ~active:(Bonsai.return true) in
+    let%map account_id
+    and key = Page.key page ~active:(Bonsai.return true) in
     match account_id, key with
     | Some id, Some (token, n) -> Some (token, n, id)
     | _ -> None
@@ -155,42 +177,52 @@ let detail_component (page : Page.t) (local_ graph) =
   in
   let form, set_form = Form.state graph in
   let action = Action.component ~backend:page.backend ~session:page.session graph in
-  let%map data and form and set_form and action and session = page.session and bump = page.bump in
+  let%map data
+  and form
+  and set_form
+  and action
+  and session = page.session
+  and bump = page.bump in
   match session with
   | None -> Page.signed_out
   | Some { token; _ } ->
-    Widgets.remote data ~f:(fun ((a : Api_types.Account.t), (st : Api_types.Statement.t)) ->
-      N.div
-        [ Widgets.section
-            ~id:"account"
-            (Widgets.account_label a)
-            [ (match a.balance with
-               | None -> Widgets.notice "The balance is not available right now."
-               | Some b ->
-                 Widgets.stats
-                   [ Widgets.stat ~label:"Available" (Format.amount b.available)
-                   ; Widgets.stat ~label:"On hold" (Format.amount b.held)
-                   ; Widgets.stat ~label:"Booked" (Format.amount b.posted)
-                   ])
-            ; details_view a
-            ; deposit_view ~action ~form ~set_form ~a ~token ~backend:page.backend ~bump
-            ; action.view
-            ]
-        ; Widgets.section
-            "Last 30 days"
-            [ (if List.is_empty st.lines
-               then Widgets.notice "No movements in this period."
-               else
-                 Widgets.table
-                   ~header:[ "Date"; "Description"; "Amount"; "Balance" ]
-                   ~numeric:[ 2; 3 ]
-                   (List.rev_map st.lines ~f:(fun (l : Api_types.Statement.Line.t) ->
-                      [ N.text (Format.time l.at)
-                      ; N.text (if String.is_empty l.reference then Format.status l.code else l.reference)
-                      ; N.text (Format.signed_amount l.amount)
-                      ; N.text (Format.amount l.balance)
-                      ])))
-            ; Widgets.link Statements [ N.text "Statements and CSV" ]
-            ]
-        ])
+    Widgets.remote
+      data
+      ~f:(fun ((a : Api_types.Account.t), (st : Api_types.Statement.t)) ->
+        N.div
+          [ Widgets.section
+              ~id:"account"
+              (Widgets.account_label a)
+              [ (match a.balance with
+                 | None -> Widgets.notice "The balance is not available right now."
+                 | Some b ->
+                   Widgets.stats
+                     [ Widgets.stat ~label:"Available" (Format.amount b.available)
+                     ; Widgets.stat ~label:"On hold" (Format.amount b.held)
+                     ; Widgets.stat ~label:"Booked" (Format.amount b.posted)
+                     ])
+              ; details_view a
+              ; deposit_view ~action ~form ~set_form ~a ~token ~backend:page.backend ~bump
+              ; action.view
+              ]
+          ; Widgets.section
+              "Last 30 days"
+              [ (if List.is_empty st.lines
+                 then Widgets.notice "No movements in this period."
+                 else
+                   Widgets.table
+                     ~header:[ "Date"; "Description"; "Amount"; "Balance" ]
+                     ~numeric:[ 2; 3 ]
+                     (List.rev_map st.lines ~f:(fun (l : Api_types.Statement.Line.t) ->
+                        [ N.text (Format.time l.at)
+                        ; N.text
+                            (if String.is_empty l.reference
+                             then Format.status l.code
+                             else l.reference)
+                        ; N.text (Format.signed_amount l.amount)
+                        ; N.text (Format.amount l.balance)
+                        ])))
+              ; Widgets.link Statements [ N.text "Statements and CSV" ]
+              ]
+          ])
 ;;

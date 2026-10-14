@@ -64,7 +64,9 @@ let select ~form ~set ~name ~label options =
           [ A.name name; A.on_change (fun _ v -> set (Map.set form ~key:name ~data:v)) ]
         (List.map options ~f:(fun (value, text) ->
            N.option
-             ~attrs:(A.value value :: (if String.equal value current then [ A.selected ] else []))
+             ~attrs:
+               (A.value value
+                :: (if String.equal value current then [ A.selected ] else []))
              [ N.text text ]))
     ]
 ;;

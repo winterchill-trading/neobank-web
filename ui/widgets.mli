@@ -6,11 +6,7 @@ open! Bonsai_web
 open Neobank_api_types
 open Neobank_web_model
 
-val link
-  :  ?attrs:Vdom.Attr.t list
-  -> Route.t
-  -> Vdom.Node.t list
-  -> Vdom.Node.t
+val link : ?attrs:Vdom.Attr.t list -> Route.t -> Vdom.Node.t list -> Vdom.Node.t
 
 val button
   :  ?id:string

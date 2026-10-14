@@ -19,7 +19,8 @@ type t =
   ; kyc_complete : token:string -> A.Kyc.Complete_request.t -> A.Kyc.Status.t res
   ; accounts : token:string -> A.Account.t list res
   ; account : token:string -> string -> A.Account.t res
-  ; statement : token:string -> ?from:string -> ?until:string -> string -> A.Statement.t res
+  ; statement :
+      token:string -> ?from:string -> ?until:string -> string -> A.Statement.t res
   ; deposit : token:string -> A.Sandbox.Deposit.t -> unit res
   ; beneficiaries : token:string -> A.Beneficiary.t list res
   ; add_beneficiary : token:string -> A.Beneficiary.Request.t -> A.Beneficiary.t res
@@ -28,7 +29,8 @@ type t =
   ; create_transfer : token:string -> A.Transfer.Request.t -> A.Transfer.t res
   ; transfers : token:string -> A.Transfer.t list res
   ; transfer : token:string -> string -> A.Transfer.t res
-  ; confirm_sca : token:string -> string -> A.Transfer.Confirm_request.t -> A.Transfer.t res
+  ; confirm_sca :
+      token:string -> string -> A.Transfer.Confirm_request.t -> A.Transfer.t res
   ; restart_sca : token:string -> string -> A.Transfer.t res
   ; cancel_transfer : token:string -> string -> A.Transfer.t res
   ; swap_quote : token:string -> A.Swap.Quote_request.t -> A.Swap.t res
@@ -51,7 +53,8 @@ type t =
   ; cancel_standing_order : token:string -> string -> A.Standing_order.t res
   ; provider_sca : token:string -> string -> A.Sca_confirm_request.t -> unit res
   ; reviews : ops_token:string -> A.Review.t list res
-  ; decide_review : ops_token:string -> string -> A.Review.Decide_request.t -> A.Review.t res
+  ; decide_review :
+      ops_token:string -> string -> A.Review.Decide_request.t -> A.Review.t res
   ; simulated_pan : string -> string option
   ; subscribe : token:string -> on_push:(A.Ws_push.t -> unit) -> unit -> unit
   }
@@ -74,7 +77,8 @@ let request ~meth ~headers ~url ~body =
          in
          (* Status 0 is a request that never got an answer (CORS, offline). *)
          if req##.status = 0
-         then Ivar.fill_if_empty result (Error (Api_failure.network ("cannot reach " ^ url)))
+         then
+           Ivar.fill_if_empty result (Error (Api_failure.network ("cannot reach " ^ url)))
          else Ivar.fill_if_empty result (Ok (req##.status, content))
        | _ -> ());
   (match body with
@@ -90,7 +94,9 @@ let decode of_yojson body =
 ;;
 
 let raw ~base_url ?token ?body ~meth path =
-  let idempotent = String.equal meth "POST" && not (String.is_prefix path ~prefix:"/auth/") in
+  let idempotent =
+    String.equal meth "POST" && not (String.is_prefix path ~prefix:"/auth/")
+  in
   let headers =
     List.filter_opt
       [ Option.map token ~f:(fun token -> "Authorization", "Bearer " ^ token)
@@ -120,9 +126,9 @@ let ws_url ~base_url ~token =
   let base =
     if String.is_prefix base_url ~prefix:"http"
     then base_url
-    else (
+    else
       let open Js_of_ocaml in
-      Js.to_string Dom_html.window##.location##.origin ^ base_url)
+      Js.to_string Dom_html.window##.location##.origin ^ base_url
   in
   match String.chop_prefix base ~prefix:"https" with
   | Some rest -> "wss" ^ rest ^ path
@@ -177,12 +183,23 @@ let live ~base_url =
   ; is_mock = false
   ; signup =
       (fun r ->
-        post Endpoint.signup (A.Auth.Signup_request.yojson_of_t r) A.Auth.Signup_response.t_of_yojson)
+        post
+          Endpoint.signup
+          (A.Auth.Signup_request.yojson_of_t r)
+          A.Auth.Signup_response.t_of_yojson)
   ; login =
-      (fun r -> post Endpoint.login (A.Auth.Login_request.yojson_of_t r) A.Auth.Session.t_of_yojson)
+      (fun r ->
+        post
+          Endpoint.login
+          (A.Auth.Login_request.yojson_of_t r)
+          A.Auth.Session.t_of_yojson)
   ; step_up =
       (fun ~token r ->
-        post ~token Endpoint.step_up (A.Auth.Step_up_request.yojson_of_t r) A.Auth.Session.t_of_yojson)
+        post
+          ~token
+          Endpoint.step_up
+          (A.Auth.Step_up_request.yojson_of_t r)
+          A.Auth.Session.t_of_yojson)
   ; logout =
       (fun ~token ->
         match%map raw ~base_url ~token ~body:empty ~meth:"POST" Endpoint.logout with
@@ -193,10 +210,18 @@ let live ~base_url =
   ; kyc_status = (fun ~token -> call ~token Endpoint.kyc A.Kyc.Status.t_of_yojson)
   ; kyc_start =
       (fun ~token r ->
-        post ~token Endpoint.kyc_start (A.Kyc.Start_request.yojson_of_t r) A.Kyc.Session.t_of_yojson)
+        post
+          ~token
+          Endpoint.kyc_start
+          (A.Kyc.Start_request.yojson_of_t r)
+          A.Kyc.Session.t_of_yojson)
   ; kyc_complete =
       (fun ~token r ->
-        post ~token Endpoint.kyc_complete (A.Kyc.Complete_request.yojson_of_t r) A.Kyc.Status.t_of_yojson)
+        post
+          ~token
+          Endpoint.kyc_complete
+          (A.Kyc.Complete_request.yojson_of_t r)
+          A.Kyc.Status.t_of_yojson)
   ; accounts = (fun ~token -> call ~token Endpoint.accounts (list A.Account.t_of_yojson))
   ; account = (fun ~token id -> call ~token (Endpoint.account id) A.Account.t_of_yojson)
   ; statement =
@@ -209,27 +234,52 @@ let live ~base_url =
       (fun ~token -> call ~token Endpoint.beneficiaries (list A.Beneficiary.t_of_yojson))
   ; add_beneficiary =
       (fun ~token r ->
-        post ~token Endpoint.beneficiaries (A.Beneficiary.Request.yojson_of_t r) A.Beneficiary.t_of_yojson)
+        post
+          ~token
+          Endpoint.beneficiaries
+          (A.Beneficiary.Request.yojson_of_t r)
+          A.Beneficiary.t_of_yojson)
   ; trust_beneficiary =
-      (fun ~token id -> post ~token (Endpoint.trust_beneficiary id) empty A.Beneficiary.t_of_yojson)
+      (fun ~token id ->
+        post ~token (Endpoint.trust_beneficiary id) empty A.Beneficiary.t_of_yojson)
   ; fee_quote =
       (fun ~token r ->
-        post ~token Endpoint.fee_quote (A.Fee_quote.Request.yojson_of_t r) A.Fee_quote.t_of_yojson)
+        post
+          ~token
+          Endpoint.fee_quote
+          (A.Fee_quote.Request.yojson_of_t r)
+          A.Fee_quote.t_of_yojson)
   ; create_transfer =
       (fun ~token r ->
-        post ~token Endpoint.transfers (A.Transfer.Request.yojson_of_t r) A.Transfer.t_of_yojson)
-  ; transfers = (fun ~token -> call ~token Endpoint.transfers (list A.Transfer.t_of_yojson))
-  ; transfer = (fun ~token id -> call ~token (Endpoint.transfer id) A.Transfer.t_of_yojson)
+        post
+          ~token
+          Endpoint.transfers
+          (A.Transfer.Request.yojson_of_t r)
+          A.Transfer.t_of_yojson)
+  ; transfers =
+      (fun ~token -> call ~token Endpoint.transfers (list A.Transfer.t_of_yojson))
+  ; transfer =
+      (fun ~token id -> call ~token (Endpoint.transfer id) A.Transfer.t_of_yojson)
   ; confirm_sca =
       (fun ~token id r ->
-        post ~token (Endpoint.confirm_sca id) (A.Transfer.Confirm_request.yojson_of_t r) A.Transfer.t_of_yojson)
+        post
+          ~token
+          (Endpoint.confirm_sca id)
+          (A.Transfer.Confirm_request.yojson_of_t r)
+          A.Transfer.t_of_yojson)
   ; restart_sca =
-      (fun ~token id -> post ~token (Endpoint.restart_sca id) empty A.Transfer.t_of_yojson)
+      (fun ~token id ->
+        post ~token (Endpoint.restart_sca id) empty A.Transfer.t_of_yojson)
   ; cancel_transfer =
-      (fun ~token id -> post ~token (Endpoint.cancel_transfer id) empty A.Transfer.t_of_yojson)
+      (fun ~token id ->
+        post ~token (Endpoint.cancel_transfer id) empty A.Transfer.t_of_yojson)
   ; swap_quote =
       (fun ~token r ->
-        post ~token Endpoint.swap_quote (A.Swap.Quote_request.yojson_of_t r) A.Swap.t_of_yojson)
+        post
+          ~token
+          Endpoint.swap_quote
+          (A.Swap.Quote_request.yojson_of_t r)
+          A.Swap.t_of_yojson)
   ; execute_swap =
       (fun ~token id -> post ~token (Endpoint.execute_swap id) empty A.Swap.t_of_yojson)
   ; swaps = (fun ~token -> call ~token Endpoint.swaps (list A.Swap.t_of_yojson))
@@ -237,14 +287,20 @@ let live ~base_url =
   ; issue_card =
       (fun ~token r ->
         post ~token Endpoint.cards (A.Card.Issue_request.yojson_of_t r) A.Card.t_of_yojson)
-  ; freeze_card = (fun ~token id -> post ~token (Endpoint.freeze_card id) empty A.Card.t_of_yojson)
+  ; freeze_card =
+      (fun ~token id -> post ~token (Endpoint.freeze_card id) empty A.Card.t_of_yojson)
   ; unfreeze_card =
       (fun ~token id -> post ~token (Endpoint.unfreeze_card id) empty A.Card.t_of_yojson)
   ; set_card_limits =
       (fun ~token id l ->
-        post ~token (Endpoint.card_limits id) (A.Card.Limits.yojson_of_t l) A.Card.t_of_yojson)
+        post
+          ~token
+          (Endpoint.card_limits id)
+          (A.Card.Limits.yojson_of_t l)
+          A.Card.t_of_yojson)
   ; card_display =
-      (fun ~token id -> call ~token (Endpoint.card_display id) Hosted.Card_display.t_of_yojson)
+      (fun ~token id ->
+        call ~token (Endpoint.card_display id) Hosted.Card_display.t_of_yojson)
   ; card_consent =
       (fun ~token id ~challenge_id ->
         post
@@ -255,7 +311,9 @@ let live ~base_url =
   ; pan_token =
       (fun ~token id ->
         (* 200 is the token; 202 a Sca_required body naming the provider's challenge. *)
-        match%map raw ~base_url ~token ~body:empty ~meth:"POST" (Endpoint.pan_token id) with
+        match%map
+          raw ~base_url ~token ~body:empty ~meth:"POST" (Endpoint.pan_token id)
+        with
         | Error e -> Error e
         | Ok (202, content) ->
           Result.map (decode A.Sca_required.t_of_yojson content) ~f:(fun r ->
@@ -264,21 +322,39 @@ let live ~base_url =
           Result.map (decode A.Card.Pan_token.t_of_yojson content) ~f:(fun t -> `Token t)
         | Ok (status, content) -> Error (Api_failure.of_response ~status content))
   ; standing_orders =
-      (fun ~token -> call ~token Endpoint.standing_orders (list A.Standing_order.t_of_yojson))
+      (fun ~token ->
+        call ~token Endpoint.standing_orders (list A.Standing_order.t_of_yojson))
   ; create_standing_order =
       (fun ~token r ->
-        post ~token Endpoint.standing_orders (A.Standing_order.Request.yojson_of_t r) A.Standing_order.t_of_yojson)
+        post
+          ~token
+          Endpoint.standing_orders
+          (A.Standing_order.Request.yojson_of_t r)
+          A.Standing_order.t_of_yojson)
   ; cancel_standing_order =
       (fun ~token id ->
-        call ~token ~meth:"DELETE" (Endpoint.standing_order id) A.Standing_order.t_of_yojson)
+        call
+          ~token
+          ~meth:"DELETE"
+          (Endpoint.standing_order id)
+          A.Standing_order.t_of_yojson)
   ; provider_sca =
       (fun ~token id r ->
-        post ~token (Endpoint.provider_sca id) (A.Sca_confirm_request.yojson_of_t r) ignore_body)
+        post
+          ~token
+          (Endpoint.provider_sca id)
+          (A.Sca_confirm_request.yojson_of_t r)
+          ignore_body)
   ; reviews =
-      (fun ~ops_token -> call ~token:ops_token Endpoint.reviews (list A.Review.t_of_yojson))
+      (fun ~ops_token ->
+        call ~token:ops_token Endpoint.reviews (list A.Review.t_of_yojson))
   ; decide_review =
       (fun ~ops_token id r ->
-        post ~token:ops_token (Endpoint.review_decision id) (A.Review.Decide_request.yojson_of_t r) A.Review.t_of_yojson)
+        post
+          ~token:ops_token
+          (Endpoint.review_decision id)
+          (A.Review.Decide_request.yojson_of_t r)
+          A.Review.t_of_yojson)
   ; simulated_pan = (fun _ -> None)
   ; subscribe = (fun ~token ~on_push -> subscribe_live ~base_url ~token ~on_push)
   }
@@ -299,7 +375,8 @@ let mock () =
   ; me = (fun ~token -> r (Mock_bank.me bank ~now:(now ()) ~token))
   ; kyc_status = (fun ~token -> r (Mock_bank.kyc_status bank ~token))
   ; kyc_start = (fun ~token x -> r (Mock_bank.kyc_start bank ~now:(now ()) ~token x))
-  ; kyc_complete = (fun ~token x -> r (Mock_bank.kyc_complete bank ~now:(now ()) ~token x))
+  ; kyc_complete =
+      (fun ~token x -> r (Mock_bank.kyc_complete bank ~now:(now ()) ~token x))
   ; accounts = (fun ~token -> r (Mock_bank.accounts bank ~token))
   ; account = (fun ~token id -> r (Mock_bank.account bank ~token id))
   ; statement =
@@ -320,11 +397,13 @@ let mock () =
   ; transfer = (fun ~token id -> r (Mock_bank.transfer bank ~token id))
   ; confirm_sca =
       (fun ~token id x -> r (Mock_bank.confirm_sca bank ~now:(now ()) ~token id x))
-  ; restart_sca = (fun ~token id -> r (Mock_bank.restart_sca bank ~now:(now ()) ~token id))
+  ; restart_sca =
+      (fun ~token id -> r (Mock_bank.restart_sca bank ~now:(now ()) ~token id))
   ; cancel_transfer =
       (fun ~token id -> r (Mock_bank.cancel_transfer bank ~now:(now ()) ~token id))
   ; swap_quote = (fun ~token x -> r (Mock_bank.swap_quote bank ~now:(now ()) ~token x))
-  ; execute_swap = (fun ~token id -> r (Mock_bank.execute_swap bank ~now:(now ()) ~token id))
+  ; execute_swap =
+      (fun ~token id -> r (Mock_bank.execute_swap bank ~now:(now ()) ~token id))
   ; swaps = (fun ~token -> r (Mock_bank.swaps bank ~token))
   ; cards = (fun ~token -> r (Mock_bank.cards bank ~token))
   ; issue_card = (fun ~token x -> r (Mock_bank.issue_card bank ~now:(now ()) ~token x))

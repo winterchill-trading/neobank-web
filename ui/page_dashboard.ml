@@ -25,8 +25,14 @@ let activity (transfers : Api_types.Transfer.t list) =
 
 let balance_card (a : Api_types.Account.t) =
   N.a
-    ~attrs:[ A.href (Route.to_hash (Account a.id)); A.class_ "balance"; A.id ("balance-" ^ a.currency) ]
-    [ N.div ~attrs:[ A.class_ "balance-currency" ] [ N.text (Currency.get a.currency).name ]
+    ~attrs:
+      [ A.href (Route.to_hash (Account a.id))
+      ; A.class_ "balance"
+      ; A.id ("balance-" ^ a.currency)
+      ]
+    [ N.div
+        ~attrs:[ A.class_ "balance-currency" ]
+        [ N.text (Currency.get a.currency).name ]
     ; N.div
         ~attrs:[ A.class_ "balance-amount" ]
         [ N.text
@@ -57,16 +63,21 @@ let component (page : Page.t) (local_ graph) =
         let open Deferred.Result.Let_syntax in
         let%bind me = page.backend.me ~token in
         let%bind accounts =
-          if String.equal me.kyc.status "active" then page.backend.accounts ~token else return []
+          if String.equal me.kyc.status "active"
+          then page.backend.accounts ~token
+          else return []
         in
         let%map transfers =
-          if String.equal me.kyc.status "active" then page.backend.transfers ~token else return []
+          if String.equal me.kyc.status "active"
+          then page.backend.transfers ~token
+          else return []
         in
         me, accounts, transfers)
       (Page.key page ~active)
       graph
   in
-  let%map data and session = page.session in
+  let%map data
+  and session = page.session in
   match session with
   | None -> Page.signed_out
   | Some _ ->
@@ -77,15 +88,20 @@ let component (page : Page.t) (local_ graph) =
            else
              Widgets.section
                "Finish opening your account"
-               [ N.p [ N.text "Verify your identity to get your IBAN, wallets and cards." ]
-               ; Widgets.link ~attrs:[ A.classes [ "btn"; "primary" ] ] Onboarding [ N.text "Continue verification" ]
+               [ N.p
+                   [ N.text "Verify your identity to get your IBAN, wallets and cards." ]
+               ; Widgets.link
+                   ~attrs:[ A.classes [ "btn"; "primary" ] ]
+                   Onboarding
+                   [ N.text "Continue verification" ]
                ])
         ; (if List.is_empty accounts
            then N.none
            else
              Widgets.section
                "Balances"
-               [ N.div ~attrs:[ A.class_ "balances" ] (List.map accounts ~f:balance_card) ])
+               [ N.div ~attrs:[ A.class_ "balances" ] (List.map accounts ~f:balance_card)
+               ])
         ; (if String.equal me.kyc.status "active"
            then
              Widgets.section
@@ -93,9 +109,15 @@ let component (page : Page.t) (local_ graph) =
                [ activity (List.take transfers 8)
                ; N.div
                    ~attrs:[ A.class_ "actions" ]
-                   [ Widgets.link ~attrs:[ A.classes [ "btn"; "primary" ] ] Send [ N.text "Send money" ]
+                   [ Widgets.link
+                       ~attrs:[ A.classes [ "btn"; "primary" ] ]
+                       Send
+                       [ N.text "Send money" ]
                    ; Widgets.link ~attrs:[ A.class_ "btn" ] Swap [ N.text "Swap" ]
-                   ; Widgets.link ~attrs:[ A.class_ "btn" ] Statements [ N.text "Statements" ]
+                   ; Widgets.link
+                       ~attrs:[ A.class_ "btn" ]
+                       Statements
+                       [ N.text "Statements" ]
                    ]
                ]
            else N.none)

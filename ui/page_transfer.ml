@@ -7,15 +7,20 @@ module N = Vdom.Node
 module A = Vdom.Attr
 
 let is_final = function
-  | "settled" | "rejected" | "failed" | "returned" | "cancelled" | "recalled" | "timed_out" ->
-    true
+  | "settled"
+  | "rejected"
+  | "failed"
+  | "returned"
+  | "cancelled"
+  | "recalled"
+  | "timed_out" -> true
   | _ -> false
 ;;
 
 let explain (t : Api_types.Transfer.t) =
   match t.status with
   | "awaiting_sca" when Option.is_some t.sca -> "Confirm this payment to send it."
-  | "awaiting_sca" | "submitted" when Option.is_some t.provider_sca ->
+  | ("awaiting_sca" | "submitted") when Option.is_some t.provider_sca ->
     "The bank sent you a code by SMS. Enter it to release the payment."
   | "under_review" ->
     "We are checking this payment before it can go out. You will be asked to confirm it \
@@ -35,7 +40,8 @@ let component (page : Page.t) (local_ graph) =
     | _ -> None
   in
   let key =
-    let%map transfer_id and key = Page.key page ~active:(Bonsai.return true) in
+    let%map transfer_id
+    and key = Page.key page ~active:(Bonsai.return true) in
     match transfer_id, key with
     | Some id, Some (token, n) -> Some (token, n, id)
     | _ -> None
@@ -48,7 +54,8 @@ let component (page : Page.t) (local_ graph) =
       graph
   in
   let poll =
-    let%map transfer and bump = page.bump in
+    let%map transfer
+    and bump = page.bump in
     match (transfer : Api_types.Transfer.t Remote.t) with
     | Loaded t when not (is_final t.status) -> bump
     | _ -> Effect.Ignore
@@ -61,7 +68,12 @@ let component (page : Page.t) (local_ graph) =
     graph;
   let form, set_form = Form.state graph in
   let action = Action.component ~backend:page.backend ~session:page.session graph in
-  let%map transfer and form and set_form and action and session = page.session and bump = page.bump in
+  let%map transfer
+  and form
+  and set_form
+  and action
+  and session = page.session
+  and bump = page.bump in
   match session with
   | None -> Page.signed_out
   | Some { token; _ } ->
@@ -97,15 +109,30 @@ let component (page : Page.t) (local_ graph) =
                 ]
             ; N.div
                 ~attrs:[ A.class_ "form-grid" ]
-                [ Form.input ~type_:"password" ~form ~set:set_form ~name:"password" ~label:"Password" ()
-                ; Form.input ~form ~set:set_form ~name:"code" ~label:"Authenticator code" ~placeholder:"123456" ()
+                [ Form.input
+                    ~type_:"password"
+                    ~form
+                    ~set:set_form
+                    ~name:"password"
+                    ~label:"Password"
+                    ()
+                ; Form.input
+                    ~form
+                    ~set:set_form
+                    ~name:"code"
+                    ~label:"Authenticator code"
+                    ~placeholder:"123456"
+                    ()
                 ]
             ; N.div
                 ~attrs:[ A.class_ "actions" ]
                 [ Widgets.button
                     ~id:"confirm-submit"
                     ~primary:true
-                    ~disabled:(Result.is_error code || String.is_empty password || Action.busy action)
+                    ~disabled:
+                      (Result.is_error code
+                       || String.is_empty password
+                       || Action.busy action)
                     ~on_click:(confirm ~password:(Some password))
                     "Confirm payment"
                 ; Widgets.button
@@ -124,9 +151,18 @@ let component (page : Page.t) (local_ graph) =
             ~attrs:[ A.id "confirm-provider"; A.class_ "step-open" ]
             [ N.p
                 [ N.text
-                    (sprintf "%d attempts left; expires at %s." c.attempts_left (Format.time c.expires_at))
+                    (sprintf
+                       "%d attempts left; expires at %s."
+                       c.attempts_left
+                       (Format.time c.expires_at))
                 ]
-            ; Form.input ~form ~set:set_form ~name:"code" ~label:"Code from the bank" ~placeholder:"123456" ()
+            ; Form.input
+                ~form
+                ~set:set_form
+                ~name:"code"
+                ~label:"Code from the bank"
+                ~placeholder:"123456"
+                ()
             ; Widgets.button
                 ~id:"provider-submit"
                 ~primary:true
@@ -146,7 +182,9 @@ let component (page : Page.t) (local_ graph) =
             ; Widgets.stat ~label:"Via" (Page_beneficiaries.rail_label t.rail)
             ; Widgets.stat ~label:"Created" (Format.time t.created_at)
             ]
-        ; (if String.is_empty t.reference then N.none else Widgets.detail ~label:"Reference" t.reference)
+        ; (if String.is_empty t.reference
+           then N.none
+           else Widgets.detail ~label:"Reference" t.reference)
         ; challenge_view
         ; (match t.status with
            | "awaiting_sca" | "under_review" | "draft" ->

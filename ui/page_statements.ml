@@ -23,7 +23,12 @@ let component (page : Page.t) (local_ graph) =
   let form, set_form = Form.state graph in
   let statement, set_statement = Bonsai.state_opt graph in
   let action = Action.component ~backend:page.backend ~session:page.session graph in
-  let%map accounts and form and set_form and statement and set_statement and action
+  let%map accounts
+  and form
+  and set_form
+  and statement
+  and set_statement
+  and action
   and session = page.session in
   match session with
   | None -> Page.signed_out
@@ -91,7 +96,9 @@ let component (page : Page.t) (local_ graph) =
            N.div
              ~attrs:[ A.id "statement" ]
              [ Widgets.stats
-                 [ Widgets.stat ~label:"Period" (Format.date st.from ^ " to " ^ Format.date st.until)
+                 [ Widgets.stat
+                     ~label:"Period"
+                     (Format.date st.from ^ " to " ^ Format.date st.until)
                  ; Widgets.stat ~label:"Opening" (Format.amount st.opening)
                  ; Widgets.stat ~label:"Closing" (Format.amount st.closing)
                  ; Widgets.stat ~label:"Movements" (Int.to_string (List.length st.lines))

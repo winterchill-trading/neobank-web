@@ -19,7 +19,8 @@ let step_label = function
 let status_text = function
   | "in_progress" -> "A few steps are left."
   | "action_required" -> "We need something from you: see the steps below."
-  | "under_review" -> "Thank you. We are reviewing your details; this page updates by itself."
+  | "under_review" ->
+    "Thank you. We are reviewing your details; this page updates by itself."
   | "active" -> "You are verified. Your accounts are ready."
   | "declined" -> "We could not verify your identity."
   | "closed" -> "This account is closed."
@@ -67,7 +68,9 @@ let component (page : Page.t) (local_ graph) =
   let sdk_error, set_sdk_error = Bonsai.state_opt graph in
   (* Results of hosted steps reach the API by webhook, so poll while one is open. *)
   let poll =
-    let%map bump = page.bump and active and open_step in
+    let%map bump = page.bump
+    and active
+    and open_step in
     if active && Option.is_some open_step then bump else Effect.Ignore
   in
   Bonsai.Clock.every
@@ -101,7 +104,8 @@ let component (page : Page.t) (local_ graph) =
           if String.equal s.kind "hosted" && not backend.is_mock
           then (
             match%bind
-              Effect.of_deferred_thunk (fun () -> launch_sdk ~backend ~token ~session:s ~bump)
+              Effect.of_deferred_thunk (fun () ->
+                launch_sdk ~backend ~token ~session:s ~bump)
             with
             | Ok () -> Effect.Ignore
             | Error e -> set_sdk_error (Some e))
@@ -124,8 +128,19 @@ let component (page : Page.t) (local_ graph) =
         let code = Check.totp (Form.get form "code") in
         N.div
           ~attrs:[ A.class_ "step-open"; A.id "kyc-code" ]
-          [ N.p [ N.text (sprintf "We sent you a code. It expires at %s." (Format.time s.expires_at)) ]
-          ; Form.input ~form ~set:set_form ~name:"code" ~label:"Code" ~placeholder:"123456" ()
+          [ N.p
+              [ N.text
+                  (sprintf
+                     "We sent you a code. It expires at %s."
+                     (Format.time s.expires_at))
+              ]
+          ; Form.input
+              ~form
+              ~set:set_form
+              ~name:"code"
+              ~label:"Code"
+              ~placeholder:"123456"
+              ()
           ; Widgets.button
               ~id:"kyc-submit-code"
               ~primary:true
@@ -142,9 +157,7 @@ let component (page : Page.t) (local_ graph) =
           [ Widgets.notice
               "Mock data: the identity provider's SDK would open here. This stand-in \
                approves the step at once."
-          ; N.div
-              ~attrs:[ A.class_ "simulated-sdk" ]
-              [ N.text (step_label s.step) ]
+          ; N.div ~attrs:[ A.class_ "simulated-sdk" ] [ N.text (step_label s.step) ]
           ; Widgets.button
               ~id:"kyc-simulate"
               ~primary:true
@@ -173,14 +186,23 @@ let component (page : Page.t) (local_ graph) =
       "Verify your identity"
       [ Widgets.remote status ~f:(fun (st : Api_types.Kyc.Status.t) ->
           N.div
-            [ N.p ~attrs:[ A.id "kyc-status" ] [ Widgets.badge st.status; N.text " "; N.text (status_text st.status) ]
+            [ N.p
+                ~attrs:[ A.id "kyc-status" ]
+                [ Widgets.badge st.status; N.text " "; N.text (status_text st.status) ]
             ; (if List.is_empty st.fields_to_resubmit
                then N.none
                else
                  Widgets.notice
-                   ("Please correct: " ^ String.concat ~sep:", " (List.map st.fields_to_resubmit ~f:Format.status)))
+                   ("Please correct: "
+                    ^ String.concat
+                        ~sep:", "
+                        (List.map st.fields_to_resubmit ~f:Format.status)))
             ; (if String.equal st.status "active"
-               then Widgets.link ~attrs:[ A.classes [ "btn"; "primary" ] ] Dashboard [ N.text "Go to your accounts" ]
+               then
+                 Widgets.link
+                   ~attrs:[ A.classes [ "btn"; "primary" ] ]
+                   Dashboard
+                   [ N.text "Go to your accounts" ]
                else
                  N.ol
                    ~attrs:[ A.class_ "steps" ]

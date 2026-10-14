@@ -32,7 +32,12 @@ let group_pan pan =
 ;;
 
 (* Draws the number and CVV with the provider's plugin, or the mock's digits. *)
-let show ~(backend : Backend.t) ~(card : Api_types.Card.t) ~display (token : Api_types.Card.Pan_token.t) =
+let show
+  ~(backend : Backend.t)
+  ~(card : Api_types.Card.t)
+  ~display
+  (token : Api_types.Card.Pan_token.t)
+  =
   match (display : Hosted.Card_display.t option) with
   | Some d when String.equal d.provider "simulated" ->
     return (Reveal.Shown { simulated = backend.simulated_pan card.id })
@@ -55,15 +60,14 @@ let show ~(backend : Backend.t) ~(card : Api_types.Card.t) ~display (token : Api
         | Ok () -> Reveal.Shown { simulated = None }))
 ;;
 
-(* Starts the provider's consent: the plugin sends the code, the API learns the
-   challenge. *)
+(* Starts the provider's consent: the plugin sends the code, the API learns the challenge. *)
 let consent ~(backend : Backend.t) ~token ~(card : Api_types.Card.t) =
   match%bind backend.card_display ~token card.id with
   | Error e ->
     return
       ( None
-      , Reveal.Failed
-          ("This bank shows no card details here: " ^ Api_failure.to_string e) )
+      , Reveal.Failed ("This bank shows no card details here: " ^ Api_failure.to_string e)
+      )
   | Ok d ->
     let%bind challenge_id =
       if String.equal d.provider "simulated"
@@ -110,7 +114,9 @@ let reveal ~(backend : Backend.t) ~token ~(card : Api_types.Card.t) ~display =
 ;;
 
 let limits_form_init (l : Api_types.Card.Limits.t) =
-  let amount = Option.value_map ~default:"" ~f:(fun (a : Api_types.Amount.t) -> a.amount) in
+  let amount =
+    Option.value_map ~default:"" ~f:(fun (a : Api_types.Amount.t) -> a.amount)
+  in
   [ "per_transaction", amount l.per_transaction
   ; "daily", amount l.daily
   ; "monthly", amount l.monthly
@@ -162,7 +168,13 @@ let component (page : Page.t) (local_ graph) =
   let editing, set_editing = Bonsai.state_opt graph in
   let reveal_state, set_reveal = Bonsai.state_opt graph in
   let action = Action.component ~backend:page.backend ~session:page.session graph in
-  let%map data and form and set_form and editing and set_editing and reveal_state and set_reveal
+  let%map data
+  and form
+  and set_form
+  and editing
+  and set_editing
+  and reveal_state
+  and set_reveal
   and action
   and session = page.session
   and bump = page.bump in
@@ -173,7 +185,8 @@ let component (page : Page.t) (local_ graph) =
     let run_reveal (card : Api_types.Card.t) ~display =
       let open Effect.Let_syntax in
       let%bind () =
-        set_reveal (Some { Reveal.card_id = card.id; display; stage = Working "Opening..." })
+        set_reveal
+          (Some { Reveal.card_id = card.id; display; stage = Working "Opening..." })
       in
       let%bind display, stage =
         Effect.of_deferred_thunk (fun () -> reveal ~backend ~token ~card ~display)
@@ -185,15 +198,17 @@ let component (page : Page.t) (local_ graph) =
            again. *)
         action.set
           (Failed
-             (Api_failure.create ~status:403 "sca_required" "confirm it is you to see card details"))
+             (Api_failure.create
+                ~status:403
+                "sca_required"
+                "confirm it is you to see card details"))
       | stage -> set_reveal (Some { card_id = card.id; display; stage })
     in
     let reveal_view (card : Api_types.Card.t) =
       match (reveal_state : Reveal.t option) with
       | Some r when String.equal r.card_id card.id ->
         let hosts =
-          (* Kept in the tree from the start so the plugin's iframes have somewhere to
-             go. *)
+          (* Kept in the tree from the start so the plugin's iframes have somewhere to go. *)
           N.div
             ~attrs:[ A.class_ "card-secrets" ]
             [ Hosted_js.host ~class_:"secret" (number_host card.id)
@@ -211,10 +226,17 @@ let component (page : Page.t) (local_ graph) =
               [ N.p
                   [ N.text
                       (sprintf
-                         "The bank sent you a code to show the card details (%d attempts left)."
+                         "The bank sent you a code to show the card details (%d attempts \
+                          left)."
                          info.attempts_left)
                   ]
-              ; Form.input ~form ~set:set_form ~name:field ~label:"Code" ~placeholder:"123456" ()
+              ; Form.input
+                  ~form
+                  ~set:set_form
+                  ~name:field
+                  ~label:"Code"
+                  ~placeholder:"123456"
+                  ()
               ; Widgets.button
                   ~id:"pan-code-submit"
                   ~primary:true
@@ -229,7 +251,8 @@ let component (page : Page.t) (local_ graph) =
                             backend.provider_sca ~token info.challenge_id { code })
                         with
                         | Error e ->
-                          set_reveal (Some { r with stage = Failed (Api_failure.to_string e) })
+                          set_reveal
+                            (Some { r with stage = Failed (Api_failure.to_string e) })
                         | Ok () ->
                           let%bind () = set_form (Map.remove form field) in
                           run_reveal card ~display:r.display))
@@ -238,7 +261,9 @@ let component (page : Page.t) (local_ graph) =
           | Shown { simulated = Some pan } ->
             N.div
               ~attrs:[ A.id "pan-simulated"; A.class_ "simulated-card" ]
-              [ Widgets.notice "Mock data: test digits, drawn here instead of by the provider's iframe."
+              [ Widgets.notice
+                  "Mock data: test digits, drawn here instead of by the provider's \
+                   iframe."
               ; N.div ~attrs:[ A.class_ "mono pan" ] [ N.text (group_pan pan) ]
               ; N.div ~attrs:[ A.class_ "mono" ] [ N.text "CVV 123" ]
               ]
@@ -261,7 +286,12 @@ let component (page : Page.t) (local_ graph) =
           ~attrs:[ A.id ("limits-" ^ card.id); A.class_ "step-open" ]
           [ N.div
               ~attrs:[ A.class_ "form-grid" ]
-              [ Form.input ~form ~set:set_form ~name:"per_transaction" ~label:"Per payment (EUR, empty for none)" ()
+              [ Form.input
+                  ~form
+                  ~set:set_form
+                  ~name:"per_transaction"
+                  ~label:"Per payment (EUR, empty for none)"
+                  ()
               ; Form.input ~form ~set:set_form ~name:"daily" ~label:"Per day (EUR)" ()
               ; Form.input ~form ~set:set_form ~name:"monthly" ~label:"Per month (EUR)" ()
               ]
@@ -298,24 +328,34 @@ let component (page : Page.t) (local_ graph) =
             ~id:("freeze-" ^ card.id)
             ~disabled:(Action.busy action)
             ~on_click:
-              (action.run ~busy:"Freezing..." (fun () -> backend.freeze_card ~token card.id) ~on_ok:(fun _ -> bump))
+              (action.run
+                 ~busy:"Freezing..."
+                 (fun () -> backend.freeze_card ~token card.id)
+                 ~on_ok:(fun _ -> bump))
             "Freeze"
         | "frozen" ->
           Widgets.button
             ~id:("unfreeze-" ^ card.id)
             ~disabled:(Action.busy action)
             ~on_click:
-              (action.run ~busy:"Unfreezing..." (fun () -> backend.unfreeze_card ~token card.id) ~on_ok:(fun _ -> bump))
+              (action.run
+                 ~busy:"Unfreezing..."
+                 (fun () -> backend.unfreeze_card ~token card.id)
+                 ~on_ok:(fun _ -> bump))
             "Unfreeze"
         | _ -> N.none
       in
       let l = card.limits in
-      let limit (a : Api_types.Amount.t option) = Option.value_map a ~default:"none" ~f:Format.amount in
+      let limit (a : Api_types.Amount.t option) =
+        Option.value_map a ~default:"none" ~f:Format.amount
+      in
       N.div
         ~attrs:[ A.class_ "bank-card"; A.id ("card-" ^ card.id) ]
         [ N.div
             ~attrs:[ A.class_ "card-face" ]
-            [ N.div ~attrs:[ A.class_ "mono pan" ] [ N.text (Option.value_map card.masked_pan ~default:"" ~f:group_pan) ]
+            [ N.div
+                ~attrs:[ A.class_ "mono pan" ]
+                [ N.text (Option.value_map card.masked_pan ~default:"" ~f:group_pan) ]
             ; N.div [ Widgets.badge card.status; N.text (" " ^ Format.status card.kind) ]
             ]
         ; Widgets.stats
@@ -339,7 +379,9 @@ let component (page : Page.t) (local_ graph) =
                 ~id:("edit-limits-" ^ card.id)
                 ~on_click:
                   (let open Effect.Let_syntax in
-                   let%bind () = set_form (String.Map.of_alist_exn (limits_form_init card.limits)) in
+                   let%bind () =
+                     set_form (String.Map.of_alist_exn (limits_form_init card.limits))
+                   in
                    set_editing (Some card.id))
                 "Limits"
             ; Widgets.button
@@ -374,11 +416,15 @@ let component (page : Page.t) (local_ graph) =
             ; Widgets.button
                 ~id:"issue-card-submit"
                 ~primary:true
-                ~disabled:(String.is_empty (Form.get form "card_account") || Action.busy action)
+                ~disabled:
+                  (String.is_empty (Form.get form "card_account") || Action.busy action)
                 ~on_click:
                   (action.run
                      ~busy:"Issuing..."
-                     (fun () -> backend.issue_card ~token { account_id = Form.get form "card_account" })
+                     (fun () ->
+                       backend.issue_card
+                         ~token
+                         { account_id = Form.get form "card_account" })
                      ~on_ok:(fun (_ : Api_types.Card.t) ->
                        let open Effect.Let_syntax in
                        let%bind () = action.set (Done "Your new card is ready.") in

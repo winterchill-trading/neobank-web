@@ -24,7 +24,13 @@ let view ~(page : Page.t) ~token ~bump ~(action : Action.t) ~form ~set_form chal
                       what
                       c.attempts_left)
                ]
-           ; Form.input ~form ~set:set_form ~name:field ~label:"Code" ~placeholder:"123456" ()
+           ; Form.input
+               ~form
+               ~set:set_form
+               ~name:field
+               ~label:"Code"
+               ~placeholder:"123456"
+               ()
            ; Widgets.button
                ~id:("provider-code-" ^ c.challenge_id)
                ~primary:true

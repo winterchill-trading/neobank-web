@@ -14,7 +14,11 @@ let view ?label text =
       ~attrs:[ A.class_ "qr" ]
       [ Svg.Node.svg
           ~attrs:
-            [ Svg.Attr.viewbox ~min_x:0. ~min_y:0. ~width:(Float.of_int size) ~height:(Float.of_int size)
+            [ Svg.Attr.viewbox
+                ~min_x:0.
+                ~min_y:0.
+                ~width:(Float.of_int size)
+                ~height:(Float.of_int size)
             ; A.class_ "qr-code"
             ; A.create "shape-rendering" "crispEdges"
             ; A.create "role" "img"
@@ -28,7 +32,11 @@ let view ?label text =
                 ]
               []
           ; Svg.Node.path
-              ~attrs:[ A.create "d" (Qr.svg_path qr); A.create "transform" "translate(4 4)"; A.class_ "qr-fg" ]
+              ~attrs:
+                [ A.create "d" (Qr.svg_path qr)
+                ; A.create "transform" "translate(4 4)"
+                ; A.class_ "qr-fg"
+                ]
               []
           ]
       ; (match label with

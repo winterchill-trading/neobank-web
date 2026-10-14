@@ -13,7 +13,9 @@ type t =
 
 let key t ~active =
   let open Bonsai.Let_syntax in
-  let%map active and session = t.session and refresh = t.refresh in
+  let%map active
+  and session = t.session
+  and refresh = t.refresh in
   match active, (session : Session.t option) with
   | true, Some s -> Some (s.token, refresh)
   | _ -> None

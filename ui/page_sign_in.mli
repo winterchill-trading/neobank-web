@@ -1,5 +1,4 @@
-(** Email, password and an authenticator code: a login is strong customer
-    authentication. *)
+(** Email, password and an authenticator code: a login is strong customer authentication. *)
 
 open! Core
 open! Bonsai_web
