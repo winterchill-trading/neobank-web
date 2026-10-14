@@ -35,7 +35,9 @@ let balance_card (a : Api_types.Account.t) =
         ]
     ; (match a.balance with
        | Some b
-         when Result.value_map (Units.of_amount b.held) ~ok:(Fn.non (Z.equal Z.zero)) ~error:(Fn.const false) ->
+         when match Units.of_amount b.held with
+              | Ok z -> not (Z.equal z Z.zero)
+              | Error _ -> false ->
          N.div ~attrs:[ A.class_ "muted" ] [ N.text ("on hold " ^ Format.amount b.held) ]
        | _ -> N.none)
     ]
