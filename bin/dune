@@ -1,0 +1,15 @@
+(executable
+ (name main)
+ (modes js)
+ (libraries core bonsai_web zarith_stubs_js neobank_web_ui)
+ (preprocess
+  (pps ppx_jane)))
+
+; The installed package is the static site: share/neobank-web/{index.html,main.js}.
+
+(install
+ (package neobank-web)
+ (section share)
+ (files
+  (main.bc.js as main.js)
+  (../static/index.html as index.html)))
