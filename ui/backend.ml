@@ -42,7 +42,7 @@ type t =
   ; freeze_card : token:string -> string -> A.Card.t res
   ; unfreeze_card : token:string -> string -> A.Card.t res
   ; set_card_limits : token:string -> string -> A.Card.Limits.t -> A.Card.t res
-  ; card_display : token:string -> string -> Hosted.Card_display.t res
+  ; card_display : token:string -> string -> A.Card.Display.t res
   ; card_consent : token:string -> string -> challenge_id:string -> A.Sca_info.t res
   ; pan_token :
       token:string
@@ -307,14 +307,13 @@ let live ~base_url =
           (A.Card.Limits.yojson_of_t l)
           A.Card.t_of_yojson)
   ; card_display =
-      (fun ~token id ->
-        call ~token (Endpoint.card_display id) Hosted.Card_display.t_of_yojson)
+      (fun ~token id -> call ~token (Endpoint.card_display id) A.Card.Display.t_of_yojson)
   ; card_consent =
       (fun ~token id ~challenge_id ->
         post
           ~token
           (Endpoint.card_consent id)
-          (`Assoc [ "challenge_id", `String challenge_id ])
+          (A.Card.Consent_request.yojson_of_t { challenge_id })
           A.Sca_info.t_of_yojson)
   ; pan_token =
       (fun ~token id ->

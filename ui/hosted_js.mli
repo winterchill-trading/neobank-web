@@ -24,7 +24,8 @@ module Kyc_sdk : sig
 end
 
 module Card_plugin : sig
-  (** Loads the plugin script and calls [create(uiSecret, {applicationId})]. *)
+  (** Loads the plugin script and calls [create(uiSecret, {applicationId})]; fails for a
+      provider without a component. *)
   val create : Neobank_web_model.Hosted.Card_display.t -> unit Or_error.t Deferred.t
 
   (** [requestConsent({userId})]: the provider sends the customer a code by SMS and email.

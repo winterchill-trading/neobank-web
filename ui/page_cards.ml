@@ -39,9 +39,10 @@ let show
   (token : Api_types.Card.Pan_token.t)
   =
   match (display : Hosted.Card_display.t option) with
-  | Some d when String.equal d.provider "simulated" ->
+  | Some d when Hosted.Card_display.is_simulated d ->
     return (Reveal.Shown { simulated = backend.simulated_pan card.id })
   | None -> return Reveal.Token_only
+  | Some d when Option.is_none (Hosted.Card_display.plugin d) -> return Reveal.Token_only
   | Some d ->
     let render key dom_id =
       Hosted_js.Card_plugin.render
@@ -70,12 +71,16 @@ let consent ~(backend : Backend.t) ~token ~(card : Api_types.Card.t) =
       )
   | Ok d ->
     let%bind challenge_id =
-      if String.equal d.provider "simulated"
+      if Hosted.Card_display.is_simulated d
       then return (Ok "simulated")
       else (
-        match%bind Hosted_js.Card_plugin.create d with
-        | Error e -> return (Error e)
-        | Ok () -> Hosted_js.Card_plugin.request_consent ~user_id:d.user_id)
+        match Hosted.Card_display.plugin d with
+        | None ->
+          return (Or_error.error_string "this provider has no card display component")
+        | Some settings ->
+          (match%bind Hosted_js.Card_plugin.create d with
+           | Error e -> return (Error e)
+           | Ok () -> Hosted_js.Card_plugin.request_consent ~user_id:settings.user_id))
     in
     (match challenge_id with
      | Error e -> return (Some d, Reveal.Failed (Error.to_string_hum e))
@@ -99,7 +104,9 @@ let reveal ~(backend : Backend.t) ~token ~(card : Api_types.Card.t) ~display =
          | Error _ -> None)
     in
     (match display with
-     | Some d when not (String.equal d.provider "simulated") ->
+     | Some d
+       when (not (Hosted.Card_display.is_simulated d))
+            && Option.is_some (Hosted.Card_display.plugin d) ->
        (match%bind Hosted_js.Card_plugin.create d with
         | Error e -> return (display, Reveal.Failed (Error.to_string_hum e))
         | Ok () ->

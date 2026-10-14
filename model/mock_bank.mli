@@ -136,7 +136,7 @@ val set_card_limits
   -> A.Card.Limits.t
   -> A.Card.t r
 
-val card_display : t -> token:string -> string -> Hosted.Card_display.t r
+val card_display : t -> token:string -> string -> A.Card.Display.t r
 
 (** The challenge the (simulated) display component started; answer it with
     {!provider_sca}. *)

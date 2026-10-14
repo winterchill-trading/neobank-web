@@ -46,7 +46,7 @@ type t =
   ; freeze_card : token:string -> string -> A.Card.t res
   ; unfreeze_card : token:string -> string -> A.Card.t res
   ; set_card_limits : token:string -> string -> A.Card.Limits.t -> A.Card.t res
-  ; card_display : token:string -> string -> Hosted.Card_display.t res
+  ; card_display : token:string -> string -> A.Card.Display.t res
   ; card_consent : token:string -> string -> challenge_id:string -> A.Sca_info.t res
   ; pan_token :
       token:string

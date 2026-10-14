@@ -7,7 +7,7 @@
     - Card number, CVV and PIN: the provider's card display plugin draws them in its own
       iframe, so they never pass through this app or the API. It needs the provider's
       application id and a UI secret meant for the browser; both come from the API at
-      runtime ({!Card_display}), never from this repository. *)
+      runtime ([GET /cards/:id/display]), never from this repository. *)
 
 open! Core
 
@@ -19,18 +19,19 @@ val kyc_sdk_script : string
 val card_plugin_sandbox_script : string
 
 module Card_display : sig
-  (** What the card page needs to start the plugin for one card: [GET /cards/:id/display].
-      [user_id] and [card_id] are the provider's ids, not ours. [ui_secret] is printed as
-      ["<hidden>"] in sexps. *)
-  type t =
-    { provider : string (** ["striga"], or ["simulated"] in mock mode *)
-    ; script_url : string option
-    ; application_id : string
-    ; ui_secret : string
-    ; user_id : string
-    ; card_id : string
-    }
-  [@@deriving sexp_of, yojson]
+  type t = Neobank_api_types.Api_types.Card.Display.t
 
+  (** What the plugin's [create] and [requestConsent] need: present only for a provider
+      with a card component ([fake] has none; the mock answers ["simulated"]). *)
+  type plugin =
+    { ui_secret : string
+    ; application_id : string
+    ; user_id : string
+    }
+
+  val plugin : t -> plugin option
+  val is_simulated : t -> bool
+
+  (** The API's script, else the sandbox build above. *)
   val script : t -> string
 end

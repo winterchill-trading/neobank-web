@@ -135,6 +135,12 @@ module Card_plugin = struct
 
   let create (d : Hosted.Card_display.t) =
     let open Deferred.Or_error.Let_syntax in
+    let%bind (settings : Hosted.Card_display.plugin) =
+      Deferred.return
+        (Or_error.of_option
+           (Hosted.Card_display.plugin d)
+           ~error:(Error.of_string "this provider has no card display component"))
+    in
     let%bind () = Browser.load_script (Hosted.Card_display.script d) in
     Deferred.return
       (let%bind.Or_error p = plugin () in
@@ -143,9 +149,9 @@ module Card_plugin = struct
            (Js.Unsafe.meth_call
               p
               "create"
-              [| str d.ui_secret
+              [| str settings.ui_secret
                ; Js.Unsafe.inject
-                   (Js.Unsafe.obj [| "applicationId", str d.application_id |])
+                   (Js.Unsafe.obj [| "applicationId", str settings.application_id |])
               |]
             : Js.Unsafe.any)))
   ;;
