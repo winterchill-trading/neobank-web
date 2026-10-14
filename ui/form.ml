@@ -7,8 +7,29 @@ type t = string String.Map.t [@@deriving sexp, equal]
 
 let get t name = Map.find t name |> Option.value ~default:""
 
+(* A page builds the new form from the one it rendered with, and two input events can
+   arrive before the next render (fast typing, or a test filling several fields). So the
+   setter sends what changed against the rendered form, and the change is applied to the
+   latest state instead of replacing it. *)
 let state ?(init = []) (local_ graph) =
-  Bonsai.state (String.Map.of_alist_reduce init ~f:(fun _ b -> b)) ~equal graph
+  let open Bonsai.Let_syntax in
+  let model, inject =
+    Bonsai.state_machine
+      ~equal
+      ~default_model:(String.Map.of_alist_reduce init ~f:(fun _ b -> b))
+      ~apply_action:(fun _ latest (base, next) ->
+        Map.symmetric_diff base next ~data_equal:String.equal
+        |> Sequence.fold ~init:latest ~f:(fun acc (key, change) ->
+          match change with
+          | `Left _ -> Map.remove acc key
+          | `Right data | `Unequal (_, data) -> Map.set acc ~key ~data))
+      graph
+  in
+  let set =
+    let%map model and inject in
+    fun next -> inject (model, next)
+  in
+  model, set
 ;;
 
 let input ?(type_ = "text") ?placeholder ?error ?hint ~form ~set ~name ~label () =
