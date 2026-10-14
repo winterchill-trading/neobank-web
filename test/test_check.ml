@@ -8,7 +8,7 @@ let show = function
 
 let%expect_test "IBAN" =
   List.iter
-    ~f:(fun s -> show (Validate.iban s))
+    ~f:(fun s -> show (Check.iban s))
     [ "DE89 3704 0044 0532 0130 00"
     ; "de89370400440532013000"
     ; "GB82 WEST 1234 5698 7654 32"
@@ -39,22 +39,22 @@ let%test_unit "a single changed digit is caught" =
         String.mapi valid ~f:(fun i c ->
           if i = pos then Char.of_int_exn (Char.to_int '0' + ((d + delta) % 10)) else c)
       in
-      [%test_pred: string Or_error.t] Result.is_error (Validate.iban changed))
+      [%test_pred: string Or_error.t] Result.is_error (Check.iban changed))
 ;;
 
 let%expect_test "BIC, email, codes, dates" =
-  show (Validate.bic "deutdeff");
-  show (Validate.bic "DEUTDEFF500");
-  show (Validate.bic "DEU1");
-  show (Validate.email " ada@example.com ");
-  show (Validate.email "ada@example");
-  show (Validate.totp "123 456");
-  show (Validate.totp "12345");
-  show (Validate.password "short");
-  show (Validate.date "1990-02-28");
-  show (Validate.date "1990-02-30");
-  show (Validate.country "de");
-  show (Validate.required ~what:"Name" "  ");
+  show (Check.bic "deutdeff");
+  show (Check.bic "DEUTDEFF500");
+  show (Check.bic "DEU1");
+  show (Check.email " ada@example.com ");
+  show (Check.email "ada@example");
+  show (Check.totp "123 456");
+  show (Check.totp "12345");
+  show (Check.password "short");
+  show (Check.date "1990-02-28");
+  show (Check.date "1990-02-30");
+  show (Check.country "de");
+  show (Check.required ~what:"Name" "  ");
   [%expect
     {|
     ok DEUTDEFF
@@ -74,7 +74,7 @@ let%expect_test "BIC, email, codes, dates" =
 
 let%expect_test "addresses" =
   List.iter
-    ~f:(fun (network, s) -> show (Validate.address ~network s))
+    ~f:(fun (network, s) -> show (Check.address ~network s))
     [ "BTC", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
     ; "BTC", "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"
     ; "BTC", "0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe"
