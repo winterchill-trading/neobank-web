@@ -1,0 +1,11 @@
+; Runs the compiled app under node with a fake DOM in mock mode and walks every page
+; (needs node on PATH). See run.js for the steps.
+
+(rule
+ (alias runtest)
+ (deps
+  ../bin/main.bc.js
+  fake_dom.js
+  run.js)
+ (action
+  (run node run.js ../bin/main.bc.js)))
