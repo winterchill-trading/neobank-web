@@ -198,14 +198,17 @@ let%expect_test "large payments wait for an operator" =
   print_s [%sexp (tr.status : string), (tr.message : string option)];
   let review = List.hd_exn (Mock_bank.reviews bank |> ok) in
   print_s [%sexp (review : A.Review.t)];
-  let _ =
+  let decide operator =
     Mock_bank.decide_review
       bank
       ~now:!now
       review.id
-      { verdict = "approve"; operator = "op"; note = None }
-    |> ok
+      { verdict = "approve"; operator; note = None }
   in
+  let first = decide "op-1" |> ok in
+  print_s [%sexp (first.status : string), (first.operator : string option)];
+  show_error (decide "op-1");
+  let _ = decide "op-2" |> ok in
   let tr = Mock_bank.transfer bank ~token tr.id |> ok in
   print_s [%sexp (tr.status : string), (Option.is_some tr.sca : bool)];
   show_error
@@ -226,6 +229,8 @@ let%expect_test "large payments wait for an operator" =
     ((id rev_9) (reference tr_8) (customer_id cus_demo) (severity review)
      (reasons ("large_amount: above the 1,000 EUR review threshold"))
      (submitted_at 2025-10-14T08:20:00.000Z) (status pending) (operator ()))
+    (awaiting_second_approval (op-1))
+    409 same_operator: a second, different operator must approve
     (awaiting_sca true)
     422 insufficient_funds: the amount and fee are more than the available balance
     |}]

@@ -1150,11 +1150,11 @@ let set_card_limits t ~now ~token id (l : A.Card.Limits.t) =
 let card_display t ~token id =
   let%bind.Result c = customer_of_token t ~token in
   let%map.Result k = owned_card t c id in
-  { Hosted.Card_display.provider = "simulated"
+  { A.Card.Display.provider = "simulated"
   ; script_url = None
-  ; application_id = "mock-application"
-  ; ui_secret = "mock-ui-secret"
-  ; user_id = c.id
+  ; application_id = None
+  ; ui_secret = None
+  ; user_id = Some c.id
   ; card_id = k.card.id
   }
 ;;
@@ -1276,7 +1276,10 @@ let reviews t = Ok t.reviews
 let decide_review t ~now id (r : A.Review.Decide_request.t) =
   match List.find t.reviews ~f:(fun x -> String.equal x.id id) with
   | None -> fail 404 "not_found" "no such review"
-  | Some rv when not (String.equal rv.status "pending") ->
+  | Some rv
+    when not
+           (String.equal rv.status "pending"
+            || String.equal rv.status "awaiting_second_approval") ->
     fail 409 "decided" "already decided"
   | Some rv ->
     let approve =
@@ -1287,6 +1290,17 @@ let decide_review t ~now id (r : A.Review.Decide_request.t) =
     in
     (match approve with
      | None -> fail 400 "invalid_request" "verdict is approve or reject"
+     | Some true when Option.is_none rv.operator ->
+       (* Four eyes, as the API does it: the first approval is recorded, the second by
+          another operator releases the payment. *)
+       let rv =
+         { rv with status = "awaiting_second_approval"; operator = Some r.operator }
+       in
+       t.reviews
+       <- List.map t.reviews ~f:(fun x -> if String.equal x.id id then rv else x);
+       Ok rv
+     | Some true when Option.exists rv.operator ~f:(String.equal r.operator) ->
+       fail 409 "same_operator" "a second, different operator must approve"
      | Some approve ->
        let rv =
          { rv with

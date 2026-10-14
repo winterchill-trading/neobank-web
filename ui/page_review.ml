@@ -84,7 +84,10 @@ let component (page : Page.t) (local_ graph) =
       [ Form.input ~form ~set:set_form ~name:"operator" ~label:"Your operator name" ()
       ; Widgets.remote reviews ~f:(fun reviews ->
           let pending =
-            List.filter reviews ~f:(fun r -> String.equal r.status "pending")
+            List.filter reviews ~f:(fun r ->
+              match r.status with
+              | "pending" | "awaiting_second_approval" -> true
+              | _ -> false)
           in
           if List.is_empty pending
           then Widgets.notice "Nothing to review."
@@ -103,6 +106,14 @@ let component (page : Page.t) (local_ graph) =
                               (Format.time r.submitted_at))
                        ]
                    ; N.ul (List.map r.reasons ~f:(fun reason -> N.li [ N.text reason ]))
+                   ; (match r.operator with
+                      | Some first ->
+                        Widgets.notice
+                          (sprintf
+                             "Approved once by %s; a second, different operator must \
+                              approve to release it."
+                             first)
+                      | None -> N.none)
                    ; Form.input
                        ~form
                        ~set:set_form
