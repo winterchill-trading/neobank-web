@@ -1,12 +1,13 @@
 open! Core
 open! Async_kernel
 open! Bonsai_web
+open Neobank_web_model
 
 type 'a t =
   | Idle
   | Loading
   | Loaded of 'a
-  | Failed of Error.t
+  | Failed of Api_failure.t
 
 let fetch ~equal ~load key (local_ graph) =
   let open Bonsai.Let_syntax in
@@ -31,4 +32,9 @@ let fetch ~equal ~load key (local_ graph) =
       match result with
       | Ok a -> Loaded a
       | Error e -> Failed e)
+;;
+
+let to_option = function
+  | Loaded a -> Some a
+  | Idle | Loading | Failed _ -> None
 ;;
