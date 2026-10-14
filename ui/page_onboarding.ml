@@ -221,6 +221,30 @@ let component (page : Page.t) (local_ graph) =
       ; (* The SDK's iframe goes here; the element stays even when no step is open so a
            launch never races the render. *)
         Hosted_js.host ~class_:"sdk-host" sdk_container
+      ; (match status with
+         | Loaded st when not (String.equal st.status "active") ->
+           N.div
+             ~attrs:[ A.class_ "sandbox" ]
+             [ N.h3 [ N.text "Sandbox" ]
+             ; N.p
+                 [ N.text
+                     "In the sandbox the provider's decision can be simulated instead of \
+                      waiting for its review."
+                 ]
+             ; Widgets.button
+                 ~id:"kyc-sandbox-approve"
+                 ~disabled:(Action.busy action)
+                 ~on_click:
+                   (action.run
+                      ~busy:"Asking the sandbox to approve..."
+                      (fun () -> backend.kyc_decision ~token { decision = "approve"; reason = None })
+                      ~on_ok:(fun (_ : Api_types.Kyc.Status.t) ->
+                        let open Effect.Let_syntax in
+                        let%bind () = set_open_step None in
+                        bump))
+                 "Approve my verification"
+             ]
+         | _ -> N.none)
       ; action.view
       ]
 ;;

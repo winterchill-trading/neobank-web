@@ -26,6 +26,7 @@ type t =
   ; statement :
       token:string -> ?from:string -> ?until:string -> string -> A.Statement.t res
   ; deposit : token:string -> A.Sandbox.Deposit.t -> unit res
+  ; kyc_decision : token:string -> A.Sandbox.Kyc_decision.t -> A.Kyc.Status.t res
   ; beneficiaries : token:string -> A.Beneficiary.t list res
   ; add_beneficiary : token:string -> A.Beneficiary.Request.t -> A.Beneficiary.t res
   ; trust_beneficiary : token:string -> string -> A.Beneficiary.t res

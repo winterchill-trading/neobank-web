@@ -22,6 +22,7 @@ type t =
   ; statement :
       token:string -> ?from:string -> ?until:string -> string -> A.Statement.t res
   ; deposit : token:string -> A.Sandbox.Deposit.t -> unit res
+  ; kyc_decision : token:string -> A.Sandbox.Kyc_decision.t -> A.Kyc.Status.t res
   ; beneficiaries : token:string -> A.Beneficiary.t list res
   ; add_beneficiary : token:string -> A.Beneficiary.Request.t -> A.Beneficiary.t res
   ; trust_beneficiary : token:string -> string -> A.Beneficiary.t res
@@ -230,6 +231,13 @@ let live ~base_url =
   ; deposit =
       (fun ~token r ->
         post ~token Endpoint.sandbox_deposit (A.Sandbox.Deposit.yojson_of_t r) ignore_body)
+  ; kyc_decision =
+      (fun ~token r ->
+        post
+          ~token
+          Endpoint.sandbox_kyc_decision
+          (A.Sandbox.Kyc_decision.yojson_of_t r)
+          A.Kyc.Status.t_of_yojson)
   ; beneficiaries =
       (fun ~token -> call ~token Endpoint.beneficiaries (list A.Beneficiary.t_of_yojson))
   ; add_beneficiary =
@@ -385,6 +393,8 @@ let mock () =
   ; deposit =
       (fun ~token x ->
         r (Result.map (Mock_bank.deposit bank ~now:(now ()) ~token x) ~f:ignore))
+  ; kyc_decision =
+      (fun ~token x -> r (Mock_bank.kyc_decision bank ~now:(now ()) ~token x))
   ; beneficiaries = (fun ~token -> r (Mock_bank.beneficiaries bank ~token))
   ; add_beneficiary =
       (fun ~token x -> r (Mock_bank.add_beneficiary bank ~now:(now ()) ~token x))
