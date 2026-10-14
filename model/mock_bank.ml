@@ -8,7 +8,7 @@ let fail ?challenge status error message =
   Error (Api_failure.create ?challenge ~status error message)
 ;;
 
-let demo_email = "ada@example.com"
+let demo_email = "demo@example.com"
 let demo_password = "correct horse battery"
 let sca_window_ms = 5. *. Clock.minute_ms
 
@@ -238,8 +238,8 @@ let create ~now =
     ; next = 0
     }
   in
-  let ada =
-    { id = "cus_ada"
+  let demo =
+    { id = "cus_demo"
     ; email = demo_email
     ; password = demo_password
     ; kyc =
@@ -252,17 +252,17 @@ let create ~now =
     ; account_ids = []
     }
   in
-  t.customers <- [ ada ];
+  t.customers <- [ demo ];
   let ago days = Clock.iso (now -. (days *. Clock.day_ms)) in
-  let eur = open_account t ada ~currency:"EUR" ~now in
-  let btc = open_account t ada ~currency:"BTC" ~now in
-  let eth = open_account t ada ~currency:"ETH" ~now in
-  let usdc = open_account t ada ~currency:"USDC" ~now in
-  let _usdt = open_account t ada ~currency:"USDT" ~now in
+  let eur = open_account t demo ~currency:"EUR" ~now in
+  let btc = open_account t demo ~currency:"BTC" ~now in
+  let eth = open_account t demo ~currency:"ETH" ~now in
+  let usdc = open_account t demo ~currency:"USDC" ~now in
+  let _usdt = open_account t demo ~currency:"USDT" ~now in
   let units currency text = Units.parse ~currency text |> Or_error.ok_exn in
   let landlord : A.Beneficiary.t =
     { id = "ben_landlord"
-    ; name = "Grace Hopper"
+    ; name = "City Flats"
     ; rails = [ "sepa" ]
     ; destination = "GB82WEST12345698765432"
     ; trusted = true
@@ -280,7 +280,7 @@ let create ~now =
     ; created_at = ago 20.
     }
   in
-  t.beneficiaries <- [ ada.id, landlord; ada.id, cold ];
+  t.beneficiaries <- [ demo.id, landlord; demo.id, cold ];
   let movement (a : account) ~days ~code ~reference ~counterparty ~rail ~direction text =
     let delta = units a.info.currency text in
     let delta = if String.equal direction "out" then Z.neg delta else delta in
@@ -288,7 +288,7 @@ let create ~now =
     book a ~at ~code ~reference delta;
     add_transfer
       t
-      ada
+      demo
       { id = fresh_id t "tr"
       ; account_id = a.info.id
       ; beneficiary_id = None
@@ -312,7 +312,7 @@ let create ~now =
     ~days:25.
     ~code:"sepa_in"
     ~reference:"Salary September"
-    ~counterparty:"Analytical Engines Ltd"
+    ~counterparty:"Example Payroll Ltd"
     ~rail:"sepa"
     ~direction:"in"
     "3200.00";
@@ -321,7 +321,7 @@ let create ~now =
     ~days:24.
     ~code:"sepa_out"
     ~reference:"Rent October"
-    ~counterparty:"Grace Hopper"
+    ~counterparty:"City Flats"
     ~rail:"sepa"
     ~direction:"out"
     "950.00";
@@ -381,13 +381,13 @@ let create ~now =
                }
            ; created_at = ago 30.
            }
-       ; card_owner = ada.id
+       ; card_owner = demo.id
        ; pan = "4242424242424242"
        ; consent = `None
        }
      ];
   t.standing_orders
-  <- [ ( ada.id
+  <- [ ( demo.id
        , { id = "so_rent"
          ; account_id = eur.info.id
          ; beneficiary_id = landlord.id

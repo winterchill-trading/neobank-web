@@ -4,7 +4,7 @@
     then a provider code for on-chain payments, swaps at fixed prices, cards, standing
     orders), but it is a demo, not a model of the API.
 
-    Seeded with one verified customer, [ada@example.com] with the password
+    Seeded with one verified customer, [demo@example.com] with the password
     [correct horse battery], and some history. Any 6-digit code is accepted except
     [000000], which is always wrong. *)
 

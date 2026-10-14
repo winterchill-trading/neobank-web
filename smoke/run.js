@@ -104,7 +104,7 @@ async function main() {
   if (!text($("#backend")).includes("mock data")) fail("header should say mock data");
   step("signed out: the dashboard asks to sign in; the header names the mock");
 
-  await signIn("ada@example.com", "correct horse battery", "000000");
+  await signIn("demo@example.com", "correct horse battery", "000000");
   await waitFor("wrong code", () => bodyText().includes("the email, password or code is wrong"));
   await type("totp", "123456");
   await press("sign-in");
@@ -115,7 +115,7 @@ async function main() {
   step("sign-in with a wrong then a good code; balances and recent activity");
 
   await go("#/accounts", "accounts table", () => $("#accounts"));
-  await go("#/accounts/acc_eur_cus_ada", "account page", () => $("#account") && $("path"));
+  await go("#/accounts/acc_eur_cus_demo", "account page", () => $("#account") && $("path"));
   if (!bodyText().includes("DE62 3704 0044 0532 0130 01")) fail("IBAN not shown in groups");
   const d = $("path").getAttribute("d");
   if (!d.startsWith("M0 0h7v1h-7z")) fail("QR path should start with the finder pattern: " + d.slice(0, 30));
@@ -125,7 +125,7 @@ async function main() {
   step("account page: grouped IBAN, QR code, sandbox deposit updates the balance");
 
   await go("#/send", "send form", () => $("#send") && select("account"));
-  await choose("account", "acc_eur_cus_ada");
+  await choose("account", "acc_eur_cus_demo");
   await choose("payee", "ben_landlord");
   await choose("rail", "sepa_instant");
   await type("amount", "100");
@@ -144,7 +144,7 @@ async function main() {
   step("SEPA Instant: fee quote, wrong code counted, confirmed with password and code, settled");
 
   await go("#/send", "send form", () => $("#send") && select("account"));
-  await choose("account", "acc_eur_cus_ada");
+  await choose("account", "acc_eur_cus_demo");
   await choose("payee", "ben_landlord");
   await type("amount", "1500");
   await press("get-quote");
@@ -163,7 +163,7 @@ async function main() {
 
   await go("#/send", "send form", () => $("#kind-crypto"));
   click($("#kind-crypto"), "crypto tab");
-  await choose("account", "acc_btc_cus_ada");
+  await choose("account", "acc_btc_cus_demo");
   await choose("payee", "ben_cold");
   await type("amount", "0.001");
   await press("get-quote");
@@ -180,8 +180,8 @@ async function main() {
   step("on-chain BTC: our SCA, then the provider's code, settled");
 
   await go("#/swap", "swap form", () => $("#swap") && select("from"));
-  await choose("from", "acc_btc_cus_ada");
-  await choose("to", "acc_eur_cus_ada");
+  await choose("from", "acc_btc_cus_demo");
+  await choose("to", "acc_eur_cus_demo");
   await type("sell", "0.001");
   await press("swap-quote-button");
   await waitFor("swap quote", () => $("#swap-quote") && text($("#swap-quote")).includes("€59.70"));
@@ -203,13 +203,13 @@ async function main() {
   await type("monthly", "4000");
   await press("limits-save");
   await waitFor("limits saved", () => bodyText().includes("Limits saved.") && text($("#card-card_1")).includes("€4,000.00"));
-  await choose("card_account", "acc_eur_cus_ada");
+  await choose("card_account", "acc_eur_cus_demo");
   await press("issue-card-submit");
   await waitFor("second card", () => all("div").filter((e) => e.classList.contains("bank-card")).length === 2);
   step("cards: consent code, simulated details, freeze and unfreeze, limits, a new card");
 
   await go("#/standing-orders", "standing orders", () => $("#standing-orders") && select("payee"));
-  await choose("account", "acc_eur_cus_ada");
+  await choose("account", "acc_eur_cus_demo");
   await choose("payee", "ben_landlord");
   await type("amount", "25");
   await type("day", "15");
@@ -222,7 +222,7 @@ async function main() {
   step("standing order with the provider's code");
 
   await go("#/statements", "statements", () => $("#statements") && select("account"));
-  await choose("account", "acc_eur_cus_ada");
+  await choose("account", "acc_eur_cus_demo");
   await press("statement-load");
   await waitFor("statement", () => $("#statement") && text($("#statement")).includes("Salary September"));
   await press("statement-csv");
@@ -233,23 +233,23 @@ async function main() {
   step("statement and its CSV download");
 
   await go("#/beneficiaries", "payees", () => $("#payees"));
-  await type("name", "Ada Two");
+  await type("name", "Second Account");
   await type("destination", "DE89 3704 0044 0532 0130 99");
   await waitFor("IBAN error", () => bodyText().includes("check digits do not match"));
   await type("destination", "DE89 3704 0044 0532 0130 00");
   await press("add-payee-submit");
-  await waitFor("payee added", () => bodyText().includes("The name matches") && text($("#payees")).includes("Ada Two"));
+  await waitFor("payee added", () => bodyText().includes("The name matches") && text($("#payees")).includes("Second Account"));
   step("payees: the IBAN check catches a typo; a new payee with a name check");
 
   await press("sign-out");
   await waitFor("signed out", () => location.hash === "#/sign-in");
   await go("#/sign-up", "sign-up form", () => input("given_name"));
-  for (const [k, v] of [["email", "lin@example.com"], ["password", "a long enough password"], ["given_name", "Lin"], ["family_name", "Example"], ["date_of_birth", "1990-04-01"], ["nationality", "de"], ["mobile", "+4915100000000"], ["line1", "Street 1"], ["city", "Berlin"], ["postal_code", "10115"], ["country", "DE"]]) await type(k, v);
+  for (const [k, v] of [["email", "sam@example.com"], ["password", "a long enough password"], ["given_name", "Sam"], ["family_name", "Example"], ["date_of_birth", "1990-04-01"], ["nationality", "de"], ["mobile", "+4915100000000"], ["line1", "Street 1"], ["city", "Berlin"], ["postal_code", "10115"], ["country", "DE"]]) await type(k, v);
   await press("sign-up");
   await waitFor("enrolment", () => $("#enrol") && $("path"));
   if (!bodyText().includes("JBSWY3DPEHPK3PXP")) fail("authenticator key missing");
   await press("go-sign-in");
-  await signIn("lin@example.com", "a long enough password", "123456");
+  await signIn("sam@example.com", "a long enough password", "123456");
   await waitFor("onboarding", () => location.hash === "#/onboarding" && $("#kyc-start-email"));
   for (const s of ["email", "mobile"]) {
     await press("kyc-start-" + s);

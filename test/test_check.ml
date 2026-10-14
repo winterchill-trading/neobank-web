@@ -46,8 +46,8 @@ let%expect_test "BIC, email, codes, dates" =
   show (Check.bic "deutdeff");
   show (Check.bic "DEUTDEFF500");
   show (Check.bic "DEU1");
-  show (Check.email " ada@example.com ");
-  show (Check.email "ada@example");
+  show (Check.email " demo@example.com ");
+  show (Check.email "demo@example");
   show (Check.totp "123 456");
   show (Check.totp "12345");
   show (Check.password "short");
@@ -60,7 +60,7 @@ let%expect_test "BIC, email, codes, dates" =
     ok DEUTDEFF
     ok DEUTDEFF500
     error: a BIC has 8 or 11 characters, the first six letters
-    ok ada@example.com
+    ok demo@example.com
     error: not an email address
     ok 123456
     error: enter the 6-digit code from your authenticator app

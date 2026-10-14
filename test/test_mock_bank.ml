@@ -49,10 +49,10 @@ let%expect_test "seeded customer" =
        });
   let token = login bank in
   balances bank ~token;
-  let eur = Mock_bank.account bank ~token "acc_eur_cus_ada" |> ok in
+  let eur = Mock_bank.account bank ~token "acc_eur_cus_demo" |> ok in
   print_s [%sexp (eur.iban : string option), (eur.bic : string option)];
   print_s [%sexp (Check.iban (Option.value_exn eur.iban) |> Result.is_ok : bool)];
-  let st = Mock_bank.statement bank ~now:!now ~token "acc_eur_cus_ada" |> ok in
+  let st = Mock_bank.statement bank ~now:!now ~token "acc_eur_cus_demo" |> ok in
   print_string
     (Statement_csv.to_string st |> String.substr_replace_all ~pattern:"\r" ~with_:"");
   [%expect
@@ -79,7 +79,7 @@ let%expect_test "a SEPA payment: quote, our SCA, settled" =
     Mock_bank.fee_quote
       bank
       ~token
-      { account_id = "acc_eur_cus_ada"
+      { account_id = "acc_eur_cus_demo"
       ; rail = "sepa_instant"
       ; amount = { amount = "100"; currency = "EUR" }
       }
@@ -91,7 +91,7 @@ let%expect_test "a SEPA payment: quote, our SCA, settled" =
       bank
       ~now:!now
       ~token
-      { account_id = "acc_eur_cus_ada"
+      { account_id = "acc_eur_cus_demo"
       ; beneficiary_id = "ben_landlord"
       ; amount = { amount = "100"; currency = "EUR" }
       ; rail = Some "sepa_instant"
@@ -148,7 +148,7 @@ let%expect_test "on-chain: our SCA, then the provider's code" =
       bank
       ~now:!now
       ~token
-      { account_id = "acc_btc_cus_ada"
+      { account_id = "acc_btc_cus_demo"
       ; beneficiary_id = "ben_cold"
       ; amount = { amount = "0.01"; currency = "BTC" }
       ; rail = None
@@ -186,7 +186,7 @@ let%expect_test "large payments wait for an operator" =
       bank
       ~now:!now
       ~token
-      { account_id = "acc_eur_cus_ada"
+      { account_id = "acc_eur_cus_demo"
       ; beneficiary_id = "ben_landlord"
       ; amount = { amount = "1500"; currency = "EUR" }
       ; rail = None
@@ -213,7 +213,7 @@ let%expect_test "large payments wait for an operator" =
        bank
        ~now:!now
        ~token
-       { account_id = "acc_eur_cus_ada"
+       { account_id = "acc_eur_cus_demo"
        ; beneficiary_id = "ben_landlord"
        ; amount = { amount = "99999"; currency = "EUR" }
        ; rail = None
@@ -223,7 +223,7 @@ let%expect_test "large payments wait for an operator" =
   [%expect
     {|
     (under_review ("under review"))
-    ((id rev_9) (reference tr_8) (customer_id cus_ada) (severity review)
+    ((id rev_9) (reference tr_8) (customer_id cus_demo) (severity review)
      (reasons ("large_amount: above the 1,000 EUR review threshold"))
      (submitted_at 2025-10-14T08:20:00.000Z) (status pending) (operator ()))
     (awaiting_sca true)
@@ -239,8 +239,8 @@ let%expect_test "swaps need a fresh SCA" =
       bank
       ~now:!now
       ~token
-      { from_account_id = "acc_btc_cus_ada"
-      ; to_account_id = "acc_eur_cus_ada"
+      { from_account_id = "acc_btc_cus_demo"
+      ; to_account_id = "acc_eur_cus_demo"
       ; sell = { amount = "0.01"; currency = "BTC" }
       }
     |> ok
@@ -253,8 +253,8 @@ let%expect_test "swaps need a fresh SCA" =
       bank
       ~now:!now
       ~token
-      { from_account_id = "acc_btc_cus_ada"
-      ; to_account_id = "acc_eur_cus_ada"
+      { from_account_id = "acc_btc_cus_demo"
+      ; to_account_id = "acc_eur_cus_demo"
       ; sell = { amount = "0.01"; currency = "BTC" }
       }
     |> ok
@@ -272,8 +272,8 @@ let%expect_test "swaps need a fresh SCA" =
   balances bank ~token;
   [%expect
     {|
-    ((id swap_8) (from_account_id acc_btc_cus_ada)
-     (to_account_id acc_eur_cus_ada) (sell ((amount 0.01) (currency BTC)))
+    ((id swap_8) (from_account_id acc_btc_cus_demo)
+     (to_account_id acc_eur_cus_demo) (sell ((amount 0.01) (currency BTC)))
      (fee ((amount 0.00005) (currency BTC)))
      (buy ((amount 597.00) (currency EUR))) (price 60000.00)
      (expires_at 2025-10-14T08:20:30.000Z) (status quoted) (provider_sca ()))
@@ -293,9 +293,9 @@ let%expect_test "sign up and verify" =
     Mock_bank.signup
       bank
       ~now:!now
-      { email = "lin@example.com"
+      { email = "sam@example.com"
       ; password = "a long enough password"
-      ; given_name = "Lin"
+      ; given_name = "Sam"
       ; family_name = "Example"
       ; date_of_birth = "1990-04-01"
       ; nationality = "DE"
@@ -315,7 +315,7 @@ let%expect_test "sign up and verify" =
     (Mock_bank.login
        bank
        ~now:!now
-       { email = "lin@example.com"; password = "a long enough password"; totp = "123456" }
+       { email = "sam@example.com"; password = "a long enough password"; totp = "123456" }
      |> ok)
       .token
   in
