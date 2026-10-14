@@ -1,0 +1,17 @@
+; Byte only: the app is compiled to JavaScript and never linked natively.
+
+(library
+ (name neobank_web_ui)
+ (modes byte)
+ (libraries
+  core
+  async_kernel
+  bonsai_web
+  virtual_dom.svg
+  js_of_ocaml
+  yojson
+  zarith
+  neobank-api-types
+  neobank_web_model)
+ (preprocess
+  (pps ppx_jane js_of_ocaml-ppx)))
