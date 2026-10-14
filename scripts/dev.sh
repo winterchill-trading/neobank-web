@@ -19,15 +19,25 @@ while getopts "p:r" opt; do
 done
 
 root=$(cd "$(dirname "$0")/.." && pwd)
-build_dir=${DUNE_BUILD_DIR:-$root/_build}
+# Inside the multi-repo workspace the sibling neobank-api provides the shared types;
+# alone, they come from the installed neobank-api-types package.
+if [[ -f $root/../dune-workspace ]]; then
+  ws=$(cd "$root/.." && pwd)
+  build_dir=${DUNE_BUILD_DIR:-$ws/_build}
+  (cd "$ws" && opam exec -- dune build --root . --profile "$profile" ./neobank-web/bin/main.bc.js)
+  js=$build_dir/default/neobank-web/bin/main.bc.js
+else
+  build_dir=${DUNE_BUILD_DIR:-$root/_build}
+  (cd "$root" && opam exec -- dune build --root . --profile "$profile" ./bin/main.bc.js)
+  js=$build_dir/default/bin/main.bc.js
+fi
 cd "$root"
-opam exec -- dune build --root . --profile "$profile" ./bin/main.bc.js
 
 site=$root/_site
 rm -rf "$site"
 mkdir -p "$site"
 cp static/index.html "$site/"
-cp "$build_dir/default/bin/main.bc.js" "$site/main.js"
+cp "$js" "$site/main.js"
 chmod -R u+w "$site"
 echo "serving $site on http://localhost:$port/?mock=1"
 exec python3 -m http.server "$port" --bind 127.0.0.1 --directory "$site"
