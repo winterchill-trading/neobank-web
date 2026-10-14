@@ -10,3 +10,4 @@ module Statement_csv = Statement_csv
 module Qr = Qr
 module Api_failure = Api_failure
 module Clock = Clock
+module Hosted = Hosted
