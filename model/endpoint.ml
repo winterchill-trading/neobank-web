@@ -37,7 +37,7 @@ let transfers = "/transfers"
 let transfer id = "/transfers/" ^ esc id
 let confirm_sca id = transfer id ^ "/confirm-sca"
 let cancel_transfer id = transfer id ^ "/cancel"
-let restart_sca id = transfer id ^ "/restart-sca"
+let restart_sca id = transfer id ^ "/sca"
 let swap_quote = "/swaps/quote"
 let swaps = "/swaps"
 let execute_swap id = "/swaps/" ^ esc id ^ "/execute"
@@ -86,7 +86,7 @@ let all =
   ; "POST", cards
   ; "POST", freeze_card ":id"
   ; "POST", unfreeze_card ":id"
-  ; "PUT", card_limits ":id"
+  ; "POST", card_limits ":id"
   ; "POST", pan_token ":id"
   ; "GET", card_display ":id"
   ; "POST", card_consent ":id"
