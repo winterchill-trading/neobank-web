@@ -290,7 +290,12 @@ async function main() {
     await type("ops_token", OPS_TOKEN);
     await press("review-open");
     const item = await waitFor("review item", () => all("div").find((e) => e.id && e.id.startsWith("review-") && e.classList.contains("review-item")));
-    await press("approve-" + item.id.slice("review-".length));
+    // Four eyes: two different operators release it.
+    const reviewId = item.id.slice("review-".length);
+    await press("approve-" + reviewId);
+    await waitFor("first approval", () => bodyText().includes("Approved once by"));
+    await type("operator", "second-operator");
+    await press("approve-" + reviewId);
     await waitFor("queue updated", () => !$("#" + item.id));
     location.hash = held;
     await waitFor("confirm after release", () => $("#confirm-sca"), 20000);

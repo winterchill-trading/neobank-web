@@ -156,10 +156,14 @@ async function main() {
   await type("ops_token", "ops");
   await press("review-open");
   const item = await waitFor("review item", () => all("div").find((e) => e.id && e.id.startsWith("review-rev")));
-  await press("approve-" + item.id.slice("review-".length));
+  const reviewId = item.id.slice("review-".length);
+  await press("approve-" + reviewId);
+  await waitFor("first approval", () => bodyText().includes("Approved once by operator"));
+  await type("operator", "second-operator");
+  await press("approve-" + reviewId);
   await waitFor("queue empty", () => bodyText().includes("Nothing to review."));
   await go(held, "released payment", () => $("#confirm-sca"));
-  step("a large payment waits for review; the operator approves it; it asks for SCA");
+  step("a large payment waits for review; two operators approve it; it asks for SCA");
 
   await go("#/send", "send form", () => $("#kind-crypto"));
   click($("#kind-crypto"), "crypto tab");
