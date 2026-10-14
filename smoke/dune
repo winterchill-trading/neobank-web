@@ -6,3 +6,15 @@
  (deps ../bin/main.bc.js fake_dom.js run.js)
  (action
   (run node run.js ../bin/main.bc.js)))
+
+; The same app against a running neobank-api over real HTTP; skipped (one line) unless
+; API_URL is set. scripts/live-smoke.sh starts an API on the fake provider and runs it.
+
+(rule
+ (alias runtest)
+ (deps
+  ../bin/main.bc.js
+  fake_dom.js
+  live.js)
+ (action
+  (run node live.js ../bin/main.bc.js)))
