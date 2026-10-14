@@ -11,3 +11,4 @@ module Qr = Qr
 module Api_failure = Api_failure
 module Clock = Clock
 module Hosted = Hosted
+module Mock_bank = Mock_bank
