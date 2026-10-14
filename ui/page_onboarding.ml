@@ -237,7 +237,10 @@ let component (page : Page.t) (local_ graph) =
                  ~on_click:
                    (action.run
                       ~busy:"Asking the sandbox to approve..."
-                      (fun () -> backend.kyc_decision ~token { decision = "approve"; reason = None })
+                      (fun () ->
+                        backend.kyc_decision
+                          ~token
+                          { decision = "approve"; reason = None })
                       ~on_ok:(fun (_ : Api_types.Kyc.Status.t) ->
                         let open Effect.Let_syntax in
                         let%bind () = set_open_step None in

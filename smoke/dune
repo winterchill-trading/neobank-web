@@ -12,9 +12,6 @@
 
 (rule
  (alias runtest)
- (deps
-  ../bin/main.bc.js
-  fake_dom.js
-  live.js)
+ (deps ../bin/main.bc.js fake_dom.js live.js)
  (action
   (run node live.js ../bin/main.bc.js)))
